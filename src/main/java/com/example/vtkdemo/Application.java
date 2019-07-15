@@ -2,8 +2,10 @@ package com.example.vtkdemo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan("com.example.vtkdemo")
 public class Application {
 
     public static void main(String[] args) {

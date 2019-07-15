@@ -5,10 +5,7 @@ import com.example.vtkdemo.model.Method;
 import com.example.vtkdemo.model.Parameter;
 import com.example.vtkdemo.model.Pipeline;
 import lombok.extern.slf4j.Slf4j;
-import org.itk.simple.Image;
-import org.itk.simple.ImageSeriesReader;
 import org.itk.simple.*;
-import org.itk.simple.VectorString;
 import org.reflections.Reflections;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
@@ -27,7 +24,6 @@ public class PipelineService {
 
 
     public void execute(Pipeline pipeline) {
-
 
         ImageSeriesReader imageSeriesReader = new ImageSeriesReader();
         final VectorString dicomNames = ImageSeriesReader.getGDCMSeriesFileNames(pipeline.getInputPath());

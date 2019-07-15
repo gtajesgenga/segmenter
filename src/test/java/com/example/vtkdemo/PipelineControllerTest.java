@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,7 +29,32 @@ public class PipelineControllerTest {
                 "   \"outputFile\":\"/home/gustavo/Descargas/35380361 STRELLA NICOLAS/Columna COL_LUMBAR Adulto/CT COL LUMBAR HUESO/out.vtk\",\n" +
                 "   \"filters\":[\n" +
                 "      {\n" +
-                "         \"filterClass\":\"IntensityWindowingImageFilter\",\n" +
+                "         \"filterClass\":\"org.itk.simple.RegionOfInterestImageFilter\",\n" +
+                "         \"methods\":[\n" +
+                "            {\n" +
+                "               \"name\":\"setSize\",\n" +
+                "               \"parameters\":[\n" +
+                "                  {\n" +
+                "                     \"value\": \"[207,162,132]\",\n" +
+                "                     \"casting\": \"org.itk.simple.VectorUInt32\",\n" +
+                "                     \"multidimensional\": \"java.lang.Long\"\n" +
+                "                  }\n" +
+                "               ]\n" +
+                "            },\n" +
+                "                        {\n" +
+                "               \"name\":\"setIndex\",\n" +
+                "               \"parameters\":[\n" +
+                "                  {\n" +
+                "                     \"value\": \"[186,110,380]\",\n" +
+                "                     \"casting\": \"org.itk.simple.VectorInt32\",\n" +
+                "                     \"multidimensional\": \"java.lang.Integer\"\n" +
+                "                  }\n" +
+                "               ]\n" +
+                "            }\n" +
+                "         ]\n" +
+                "      },\n" +
+                "      {\n" +
+                "         \"filterClass\":\"org.itk.simple.IntensityWindowingImageFilter\",\n" +
                 "         \"methods\":[\n" +
                 "            {\n" +
                 "               \"name\":\"setWindowMinimum\",\n" +
@@ -71,7 +95,7 @@ public class PipelineControllerTest {
                 "         ]\n" +
                 "      },\n" +
                 "      {\n" +
-                "         \"filterClass\":\"ThresholdImageFilter\",\n" +
+                "         \"filterClass\":\"org.itk.simple.ThresholdImageFilter\",\n" +
                 "         \"methods\":[\n" +
                 "            {\n" +
                 "               \"name\":\"setLower\",\n" +
@@ -103,7 +127,7 @@ public class PipelineControllerTest {
                 "         ]\n" +
                 "      },\n" +
                 "      {\n" +
-                "         \"filterClass\":\"GrayscaleFillholeImageFilter\",\n" +
+                "         \"filterClass\":\"org.itk.simple.GrayscaleFillholeImageFilter\",\n" +
                 "         \"methods\":[\n" +
                 "            {\n" +
                 "               \"name\":\"fullyConnectedOn\",\n" +
@@ -112,7 +136,7 @@ public class PipelineControllerTest {
                 "         ]\n" +
                 "      },\n" +
                 "      {\n" +
-                "         \"filterClass\":\"MedianImageFilter\",\n" +
+                "         \"filterClass\":\"org.itk.simple.MedianImageFilter\",\n" +
                 "         \"methods\":[\n" +
                 "            {\n" +
                 "               \"name\":\"setRadius\",\n" +
@@ -126,7 +150,7 @@ public class PipelineControllerTest {
                 "         ]\n" +
                 "      },\n" +
                 "      {\n" +
-                "         \"filterClass\":\"BinaryThresholdImageFilter\",\n" +
+                "         \"filterClass\":\"org.itk.simple.BinaryThresholdImageFilter\",\n" +
                 "         \"methods\":[\n" +
                 "            {\n" +
                 "               \"name\":\"setLowerThreshold\",\n" +
@@ -161,31 +185,6 @@ public class PipelineControllerTest {
                 "                  {\n" +
                 "                     \"value\": 0,\n" +
                 "                     \"casting\": \"java.lang.Short\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      },\n" +
-                "      {\n" +
-                "         \"filterClass\":\"RegionOfInterestImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"setSize\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": \"[207,162,132]\",\n" +
-                "                     \"casting\": \"org.itk.simple.VectorUInt32\",\n" +
-                "                     \"multidimensional\": \"java.lang.Long\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "                        {\n" +
-                "               \"name\":\"setIndex\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": \"[186,110,380]\",\n" +
-                "                     \"casting\": \"org.itk.simple.VectorInt32\",\n" +
-                "                     \"multidimensional\": \"java.lang.Integer\"\n" +
                 "                  }\n" +
                 "               ]\n" +
                 "            }\n" +
