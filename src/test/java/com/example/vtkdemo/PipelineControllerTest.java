@@ -1,6 +1,7 @@
 package com.example.vtkdemo;
 
 import com.example.vtkdemo.controller.PipelineController;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(PipelineController.class)
@@ -25,8 +25,8 @@ public class PipelineControllerTest {
     @Before
     public void setUp() {
         pipeline = "{\n" +
-                "   \"inputPath\":\"/home/gustavo/Descargas/35380361 STRELLA NICOLAS/Columna COL_LUMBAR Adulto/CT COL LUMBAR HUESO\",\n" +
-                "   \"outputFile\":\"/home/gustavo/Descargas/35380361 STRELLA NICOLAS/Columna COL_LUMBAR Adulto/CT COL LUMBAR HUESO/out.vtk\",\n" +
+                "   \"studyId\":\"1.3.12.2.1107.5.1.4.79090.30000019050611371988300000022\",\n" +
+                "   \"serieId\":\"1.3.12.2.1107.5.1.4.79090.30000019050611410881700005482\",\n" +
                 "   \"filters\":[\n" +
                 "      {\n" +
                 "         \"filterClass\":\"org.itk.simple.RegionOfInterestImageFilter\",\n" +
@@ -204,7 +204,8 @@ public class PipelineControllerTest {
             )
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-            .andExpect(content().bytes(new byte[]{}));
+            .andExpect(content().bytes(IOUtils.toByteArray(this.getClass().getResourceAsStream("/test.vtk"))))
+            .andExpect(header().string("Vtk-demo-errors", ""));
         } catch (Exception e) {
             e.printStackTrace();
         }

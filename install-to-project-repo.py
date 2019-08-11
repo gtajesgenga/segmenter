@@ -12,7 +12,6 @@
 
 import os
 import re
-import shutil
 
 
 def jars(dir):

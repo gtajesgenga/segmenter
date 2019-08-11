@@ -15,10 +15,10 @@ import java.util.List;
 public class Pipeline {
 
     @NotNull
-    private String inputPath;
+    private String studyId;
 
     @NotNull
-    private String outputFile;
+    private String serieId;
 
     private List<Filter> filters;
 }

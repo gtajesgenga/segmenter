@@ -1,3 +1,23 @@
 logging:
   level:
-    com.example.vtkdemo: debug
+    org.springframework: INFO
+    com.example.vtkdemo: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+application:
+  tempFolder: @project.basedir@/tmp
+  rest-template-login: false
+
+
+servers:
+  orthanc:
+    host: localhost
+    port: 8042
+    endpoints:
+      find: "/tools/find/"
+      instances: "/instances/{instance}/file"

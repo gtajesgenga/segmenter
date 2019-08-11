@@ -1,17 +1,24 @@
 package com.example.vtkdemo.service;
 
+import com.example.vtkdemo.client.OrthancClient;
+import com.example.vtkdemo.config.ApplicationConfig;
 import com.example.vtkdemo.model.Filter;
 import com.example.vtkdemo.model.Method;
 import com.example.vtkdemo.model.Parameter;
 import com.example.vtkdemo.model.Pipeline;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.itk.simple.*;
 import org.reflections.Reflections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,26 +27,64 @@ import java.util.stream.Stream;
 @Slf4j
 public class PipelineService {
 
-    private Stack<Image> images = new Stack<>();
+    private final Stack<Image> images = new Stack<>();
+
+    private final ApplicationConfig applicationConfig;
+
+    private final OrthancClient orthancClient;
+
+    @Autowired public PipelineService(ApplicationConfig applicationConfig, OrthancClient orthancClient) {
+        this.applicationConfig = applicationConfig;
+        this.orthancClient = orthancClient;
+    }
 
 
-    public void execute(Pipeline pipeline) {
+    public byte[] execute(Pipeline pipeline) throws InvocationTargetException {
+
+        List<String> instances = orthancClient.getInstances(pipeline.getStudyId(), pipeline.getSerieId());
+
+        Path path = null;
+
+        if (!instances.isEmpty()) {
+            path = Paths.get(applicationConfig.getTempFolder(), pipeline.getStudyId(), pipeline.getSerieId());
+            if (path.toFile().mkdirs()) {
+
+                Path finalPath = path;
+                instances.forEach(instance -> {
+                    File file = Paths.get(finalPath.toString(), instance).toFile();
+                    try {
+                        OutputStream os = new FileOutputStream(file);
+                        os.write(orthancClient.fetchInstance(instance));
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }
 
         ImageSeriesReader imageSeriesReader = new ImageSeriesReader();
-        final VectorString dicomNames = ImageSeriesReader.getGDCMSeriesFileNames(pipeline.getInputPath());
+        final VectorString dicomNames = ImageSeriesReader.getGDCMSeriesFileNames(Objects.requireNonNull(path).toString());
         imageSeriesReader.setFileNames(dicomNames);
 
         images.push(imageSeriesReader.execute());
 
-        SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+        //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
-        pipeline.getFilters()
-                .forEach(this::processFilter);
+        for (Filter filter : pipeline.getFilters()) {
+            processFilter(filter);
+        }
 
-        SimpleITK.writeImage(images.peek(), pipeline.getOutputFile());
+        SimpleITK.writeImage(images.peek(), Paths.get(path.toString(), "out.vtk").toString());
+        try {
+            return IOUtils.toByteArray(new FileInputStream(new File(Paths.get(path.toString(), "out.vtk").toString())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new byte[0];
     }
 
-    private void processFilter(Filter filter) {
+    private void processFilter(Filter filter) throws InvocationTargetException {
         try {
             Object instance = Class.forName(filter.getFilterClass()).getConstructor().newInstance();
 
@@ -48,11 +93,9 @@ public class PipelineService {
                     .forEach(method -> processMethod(instance, method));
 
             images.push((Image) instance.getClass().getMethod("execute", images.peek().getClass()).invoke(instance, images.peek()));
-            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+            //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
         } catch (InstantiationException e) {
             log.error("Error creating new instance of '{}'", filter.getFilterClass(), e);
-        } catch (InvocationTargetException e) {
-            log.error("Error on invocation", e);
         } catch (NoSuchMethodException e) {
             log.error("Error getting method", e);
         } catch (IllegalAccessException e) {
