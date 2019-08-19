@@ -1,3 +1,22 @@
+spring:
+  application:
+    name: "vtkDemo"
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/vtk?applicationName=${spring.application.name}
+    username: "vtkapp_user"
+    password: "vtk4ppus3r"
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
 logging:
   level:
     org.springframework: INFO
@@ -7,7 +26,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        exclude: "*"
 
 application:
   tempFolder: @project.basedir@/tmp

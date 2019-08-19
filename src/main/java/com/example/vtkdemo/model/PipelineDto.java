@@ -5,14 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Filter {
+public class PipelineDto {
 
-    private String filterClass;
-    private List<Method> methods;
+    @NotNull
+    private List<FilterDto> filters;
 }

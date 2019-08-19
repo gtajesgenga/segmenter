@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(PipelineController.class)
-public class PipelineControllerTest {
+public class PipelineDtoEntityControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -197,7 +197,7 @@ public class PipelineControllerTest {
     @Test
     public void testPostMethod() {
         try {
-            mvc.perform(post("/pipeline")
+            mvc.perform(post("/pipelineDto")
                     .accept(MediaType.APPLICATION_OCTET_STREAM)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(pipeline)
