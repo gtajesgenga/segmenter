@@ -22,7 +22,7 @@ public class VtkController {
         this.vtkService = vtkService;
     }
 
-    @GetMapping(produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    @GetMapping(value = "/study/{studyId}/serie/{serieId}/pipeline/{pipelineId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     @ResponseBody
     public ResponseEntity<byte[]> getVTK(@NotNull @PathVariable String studyId,
                                          @NotNull @PathVariable String serieId,

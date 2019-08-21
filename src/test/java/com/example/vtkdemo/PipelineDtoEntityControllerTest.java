@@ -1,212 +1,78 @@
 package com.example.vtkdemo;
 
 import com.example.vtkdemo.controller.PipelineController;
+import com.example.vtkdemo.controller.VtkController;
+import com.example.vtkdemo.entity.PipelineEntity;
+import com.example.vtkdemo.model.FilterDto;
+import com.example.vtkdemo.model.PipelineDto;
+import com.example.vtkdemo.model.PipelineRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(PipelineController.class)
+@SpringBootTest(classes = Application.class)
 public class PipelineDtoEntityControllerTest {
 
     @Autowired
-    private MockMvc mvc;
-    private String pipeline;
+    private ObjectMapper objectMapper;
+    @Autowired
+    PipelineController pipelineController;
+    @Autowired
+    VtkController vtkController;
+    private Long id;
 
     @Before
-    public void setUp() {
-        pipeline = "{\n" +
-                "   \"studyId\":\"1.3.12.2.1107.5.1.4.79090.30000019050611371988300000022\",\n" +
-                "   \"serieId\":\"1.3.12.2.1107.5.1.4.79090.30000019050611410881700005482\",\n" +
-                "   \"filters\":[\n" +
-                "      {\n" +
-                "         \"filterClass\":\"org.itk.simple.RegionOfInterestImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"setSize\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": \"[207,162,132]\",\n" +
-                "                     \"casting\": \"org.itk.simple.VectorUInt32\",\n" +
-                "                     \"multidimensional\": \"java.lang.Long\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "                        {\n" +
-                "               \"name\":\"setIndex\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": \"[186,110,380]\",\n" +
-                "                     \"casting\": \"org.itk.simple.VectorInt32\",\n" +
-                "                     \"multidimensional\": \"java.lang.Integer\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      },\n" +
-                "      {\n" +
-                "         \"filterClass\":\"org.itk.simple.IntensityWindowingImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"setWindowMinimum\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\":-135,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setWindowMaximum\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\":215,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setOutputMinimum\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\":-1502,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setOutputMaximum\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\":1370,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      },\n" +
-                "      {\n" +
-                "         \"filterClass\":\"org.itk.simple.ThresholdImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"setLower\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\":216.74,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setUpper\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\":1645.76,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setOutsideValue\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": 0.0,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      },\n" +
-                "      {\n" +
-                "         \"filterClass\":\"org.itk.simple.GrayscaleFillholeImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"fullyConnectedOn\",\n" +
-                "               \"parameters\":[]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      },\n" +
-                "      {\n" +
-                "         \"filterClass\":\"org.itk.simple.MedianImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"setRadius\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                      \"value\": 3,\n" +
-                "                      \"casting\": \"java.lang.Long\"\n" +
-                "                  }\n" +
-                "                ]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      },\n" +
-                "      {\n" +
-                "         \"filterClass\":\"org.itk.simple.BinaryThresholdImageFilter\",\n" +
-                "         \"methods\":[\n" +
-                "            {\n" +
-                "               \"name\":\"setLowerThreshold\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": 1300,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setUpperThreshold\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": 1370,\n" +
-                "                     \"casting\": \"java.lang.Double\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setInsideValue\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": 255,\n" +
-                "                     \"casting\": \"java.lang.Short\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            },\n" +
-                "            {\n" +
-                "               \"name\":\"setOutsideValue\",\n" +
-                "               \"parameters\":[\n" +
-                "                  {\n" +
-                "                     \"value\": 0,\n" +
-                "                     \"casting\": \"java.lang.Short\"\n" +
-                "                  }\n" +
-                "               ]\n" +
-                "            }\n" +
-                "         ]\n" +
-                "      }\n" +
-                "   ]\n" +
-                "}";
+    public void setUp() throws IOException {
+        InputStream inputStream = new ClassPathResource("filters.json").getInputStream();
+        List<FilterDto> filters;
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream)) ) {
+            filters = objectMapper.readValue(reader.lines()
+                    .collect(Collectors.joining("\n")), List.class);
+        }
+
+        PipelineRequest request = new PipelineRequest("pipeline-test", PipelineDto.builder()
+                .filters(filters)
+                .build());
+
+        Resource<PipelineEntity> response = pipelineController.createPipeline(request);
+        id = response.getContent().getId();
+    }
+
+    @After
+    public void setDown() {
+        pipelineController.deletePipeline(id);
     }
 
     @Test
     public void testPostMethod() {
+        ResponseEntity<byte[]> result = vtkController.getVTK("1.3.12.2.1107.5.1.4.79090.30000019050611371988300000022",
+                "1.3.12.2.1107.5.1.4.79090.30000019050611410881700005482",
+                id);
         try {
-            mvc.perform(post("/pipelineDto")
-                    .accept(MediaType.APPLICATION_OCTET_STREAM)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(pipeline)
-            )
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-            .andExpect(content().bytes(IOUtils.toByteArray(this.getClass().getResourceAsStream("/test.vtk"))))
-            .andExpect(header().string("Vtk-demo-errors", ""));
-        } catch (Exception e) {
+            assertThat(IOUtils.toByteArray(this.getClass().getResourceAsStream("/test.vtk")), equalTo(result.getBody()));
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

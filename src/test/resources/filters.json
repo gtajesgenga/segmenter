@@ -1,0 +1,164 @@
+[
+  {
+    "filterClass":"org.itk.simple.RegionOfInterestImageFilter",
+    "methods":[
+      {
+        "name":"setSize",
+        "parameters":[
+          {
+            "value": "[207,162,132]",
+            "casting": "org.itk.simple.VectorUInt32",
+            "multidimensional": "java.lang.Long"
+          }
+        ]
+      },
+      {
+        "name":"setIndex",
+        "parameters":[
+          {
+            "value": "[186,110,380]",
+            "casting": "org.itk.simple.VectorInt32",
+            "multidimensional": "java.lang.Integer"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filterClass":"org.itk.simple.IntensityWindowingImageFilter",
+    "methods":[
+      {
+        "name":"setWindowMinimum",
+        "parameters":[
+          {
+            "value":-135,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setWindowMaximum",
+        "parameters":[
+          {
+            "value":215,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setOutputMinimum",
+        "parameters":[
+          {
+            "value":-1502,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setOutputMaximum",
+        "parameters":[
+          {
+            "value":1370,
+            "casting": "java.lang.Double"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filterClass":"org.itk.simple.ThresholdImageFilter",
+    "methods":[
+      {
+        "name":"setLower",
+        "parameters":[
+          {
+            "value":216.74,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setUpper",
+        "parameters":[
+          {
+            "value":1645.76,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setOutsideValue",
+        "parameters":[
+          {
+            "value": 0.0,
+            "casting": "java.lang.Double"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filterClass":"org.itk.simple.GrayscaleFillholeImageFilter",
+    "methods":[
+      {
+        "name":"fullyConnectedOn",
+        "parameters":[]
+      }
+    ]
+  },
+  {
+    "filterClass":"org.itk.simple.MedianImageFilter",
+    "methods":[
+      {
+        "name":"setRadius",
+        "parameters":[
+          {
+            "value": 3,
+            "casting": "java.lang.Long"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filterClass":"org.itk.simple.BinaryThresholdImageFilter",
+    "methods":[
+      {
+        "name":"setLowerThreshold",
+        "parameters":[
+          {
+            "value": 1300,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setUpperThreshold",
+        "parameters":[
+          {
+            "value": 1370,
+            "casting": "java.lang.Double"
+          }
+        ]
+      },
+      {
+        "name":"setInsideValue",
+        "parameters":[
+          {
+            "value": 255,
+            "casting": "java.lang.Short"
+          }
+        ]
+      },
+      {
+        "name":"setOutsideValue",
+        "parameters":[
+          {
+            "value": 0,
+            "casting": "java.lang.Short"
+          }
+        ]
+      }
+    ]
+  }
+]
