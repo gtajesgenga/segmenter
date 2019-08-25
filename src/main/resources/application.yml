@@ -16,9 +16,11 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+    open-in-view: false
 
 logging:
   level:
+    root: INFO
     org.springframework: INFO
     com.example.vtkdemo: DEBUG
 
