@@ -3,9 +3,9 @@ spring:
     name: "vtkDemo"
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/vtk?applicationName=${spring.application.name}
-    username: "vtkapp_user"
-    password: "vtk4ppus3r"
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vtk}?applicationName=${spring.application.name}
+    username: ${SPRING_DATASOURCE_USERNAME:vtkapp_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:vtk4ppus3r}
 
   jpa:
     hibernate:
@@ -28,10 +28,10 @@ management:
   endpoints:
     web:
       exposure:
-        exclude: "*"
+        include: "*"
 
 application:
-  tempFolder: @project.basedir@/tmp
+  tempFolder: ${BUILD_DIR:.}/tmp
   rest-template-login: false
 
 
