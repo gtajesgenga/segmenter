@@ -15,5 +15,13 @@ public class OrthancServerConfig {
 
     public Integer port;
 
+    public String scheme;
+
+    public String username;
+
+    public String password;
+
+    public Boolean authEnabled = false;
+
     public Map<String, String> endpoints;
 }

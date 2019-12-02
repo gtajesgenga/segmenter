@@ -1,0 +1,8 @@
+servers:
+  orthanc:
+    host: gtajesgenga-heroku-orthanc.herokuapp.com
+    port: 443
+    scheme: https
+    auth-Enabled: true
+    username: orthanc
+    password: orthanc

@@ -5,6 +5,7 @@ import com.example.vtkdemo.client.model.QueryRequestModel;
 import com.example.vtkdemo.config.OrthancServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -35,13 +36,20 @@ public class OrthancClient {
                 .build();
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme("http")
+                .scheme(orthancServerConfig.getScheme())
                 .host(orthancServerConfig.getHost())
                 .port(orthancServerConfig.getPort())
                 .path(orthancServerConfig.getEndpoints().get("find"))
                 .build();
 
         HttpEntity<FindRequestModel> request = new HttpEntity<>(findRequestModel);
+
+        if (orthancServerConfig.getAuthEnabled()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
+            request = new HttpEntity<>(findRequestModel, headers);
+        }
+
         return restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
     }
 

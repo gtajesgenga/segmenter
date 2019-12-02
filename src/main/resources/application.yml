@@ -39,6 +39,7 @@ servers:
   orthanc:
     host: localhost
     port: 8042
+    scheme: http
     endpoints:
       find: "/tools/find/"
       instances: "/instances/{instance}/file"
