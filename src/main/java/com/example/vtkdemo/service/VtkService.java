@@ -49,6 +49,7 @@ public class VtkService {
     public byte[] execute(String studyId, String serieId, Long pipelineId) throws InvocationTargetException {
 
         List<String> instances = orthancClient.getInstances(studyId, serieId);
+        log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
 
         Optional<PipelineEntity> pipeline = pipelineRepository.findById(pipelineId);
 
@@ -57,8 +58,11 @@ public class VtkService {
 
             if (!instances.isEmpty()) {
                 path = Paths.get(applicationConfig.getTempFolder(), studyId, serieId);
+                log.debug("Path to create: {}", path.toAbsolutePath().toString());
+
                 if (path.toFile().mkdirs()) {
 
+                    log.debug("Path created");
                     Path finalPath = path;
                     instances.forEach(instance -> {
                         File file = Paths.get(finalPath.toString(), instance).toFile();

@@ -1,37 +1,12 @@
 [
   {
-    "filterClass":"org.itk.simple.RegionOfInterestImageFilter",
-    "methods":[
-      {
-        "name":"setSize",
-        "parameters":[
-          {
-            "value": "[207,162,132]",
-            "casting": "org.itk.simple.VectorUInt32",
-            "multidimensional": "java.lang.Long"
-          }
-        ]
-      },
-      {
-        "name":"setIndex",
-        "parameters":[
-          {
-            "value": "[186,110,380]",
-            "casting": "org.itk.simple.VectorInt32",
-            "multidimensional": "java.lang.Integer"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "filterClass":"org.itk.simple.IntensityWindowingImageFilter",
     "methods":[
       {
         "name":"setWindowMinimum",
         "parameters":[
           {
-            "value":-135,
+            "value":-100,
             "casting": "java.lang.Double"
           }
         ]
@@ -40,7 +15,7 @@
         "name":"setWindowMaximum",
         "parameters":[
           {
-            "value":215,
+            "value":900,
             "casting": "java.lang.Double"
           }
         ]
@@ -72,7 +47,7 @@
         "name":"setLower",
         "parameters":[
           {
-            "value":216.74,
+            "value":253.45,
             "casting": "java.lang.Double"
           }
         ]
@@ -81,7 +56,7 @@
         "name":"setUpper",
         "parameters":[
           {
-            "value":1645.76,
+            "value":2024.19,
             "casting": "java.lang.Double"
           }
         ]

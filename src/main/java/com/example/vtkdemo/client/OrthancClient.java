@@ -6,6 +6,8 @@ import com.example.vtkdemo.config.OrthancServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -56,12 +58,22 @@ public class OrthancClient {
     public byte[] fetchInstance(String instance) {
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme("http")
+                .scheme(orthancServerConfig.getScheme())
                 .host(orthancServerConfig.getHost())
                 .port(orthancServerConfig.getPort())
                 .path(orthancServerConfig.getEndpoints().get("instances"))
                 .buildAndExpand(instance);
 
-        return restTemplate.getForObject(uriComponents.toUri(), byte[].class);
+        HttpEntity request = new HttpEntity<>(new HttpHeaders());
+        if (orthancServerConfig.getAuthEnabled()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
+            request = new HttpEntity<>(headers);
+        }
+
+        ResponseEntity<byte[]> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, request, byte[].class);
+
+
+        return response.getBody();
     }
 }
