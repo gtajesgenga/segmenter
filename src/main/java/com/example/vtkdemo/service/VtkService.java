@@ -47,7 +47,7 @@ public class VtkService {
 
         List<String> instances = orthancClient.getInstances(studyId, serieId);
         log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
-        log.debug("Instances {}", Arrays.toString(instances.toArray()));
+        log.info("Instances {}", Arrays.toString(instances.toArray()));
 
         Optional<PipelineEntity> pipeline = pipelineRepository.findById(pipelineId);
 
