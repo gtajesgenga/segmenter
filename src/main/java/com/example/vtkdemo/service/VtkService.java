@@ -20,10 +20,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,6 +47,7 @@ public class VtkService {
 
         List<String> instances = orthancClient.getInstances(studyId, serieId);
         log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
+        log.debug("Instances {}", Arrays.toString(instances.toArray()));
 
         Optional<PipelineEntity> pipeline = pipelineRepository.findById(pipelineId);
 
