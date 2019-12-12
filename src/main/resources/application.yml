@@ -22,7 +22,7 @@ logging:
   level:
     root: INFO
     org.springframework: INFO
-    com.example.vtkdemo..*: DEBUG
+    com.example.vtkdemo: DEBUG
 
 management:
   endpoints:

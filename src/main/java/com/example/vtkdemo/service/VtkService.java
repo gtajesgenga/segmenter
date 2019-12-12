@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -88,6 +89,7 @@ public class VtkService {
             }
 
             SimpleITK.writeImage(images.peek(), Paths.get(path.toString(), "out.vtk").toString());
+
             try {
                 return IOUtils.toByteArray(new FileInputStream(new File(Paths.get(path.toString(), "out.vtk").toString())));
             } catch (IOException e) {
@@ -98,6 +100,7 @@ public class VtkService {
     }
 
     private void processFilter(FilterDto filter) throws InvocationTargetException {
+
         try {
             Object instance = Class.forName(filter.getFilterClass()).getConstructor().newInstance();
 
@@ -116,7 +119,7 @@ public class VtkService {
         } catch (ClassNotFoundException e) {
             log.error("Error getting class", e);
         } finally {
-            System.gc();
+            gc();
         }
     }
 
@@ -130,6 +133,8 @@ public class VtkService {
             log.error("Error on access to method", e);
         } catch (InvocationTargetException e) {
             log.error("Error on invocation", e);
+        } finally {
+            gc();
         }
     }
 
@@ -150,6 +155,8 @@ public class VtkService {
                         log.error("Error on access to method", e);
                     } catch (InvocationTargetException e) {
                         log.error("Error on invocation", e);
+                    } finally {
+                        gc();
                     }
 
                     return parameter.getDefaultCasting().cast(processValue(parameter));
@@ -193,6 +200,8 @@ public class VtkService {
                 log.error("Error on invocation", e);
             } catch (InstantiationException e) {
                 log.error("Error creating new instance of '{}'", parameter.getDefaultCasting().getCanonicalName(), e);
+            } finally {
+                gc();
             }
         }
         return parameter.getValue();
@@ -208,10 +217,20 @@ public class VtkService {
                             return clazz.getMethod(clazz.getSimpleName().toLowerCase().replace("integer", "int") + "Value").getReturnType();
                     } catch (NoSuchMethodException e) {
                         log.error("Error getting method", e);
+                    } finally {
+                        gc();
                     }
                     return clazz;
                 })
                 .collect(Collectors.toUnmodifiableList()).toArray(new Class[0]);
     }
 
+    private static void gc() {
+        Object obj = new Object();
+        WeakReference ref = new WeakReference<Object>(obj);
+        obj = null;
+        while(ref.get() != null) {
+            System.gc();
+        }
+    }
 }

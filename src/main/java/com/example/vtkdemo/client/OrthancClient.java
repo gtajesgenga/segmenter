@@ -58,8 +58,6 @@ public class OrthancClient {
 
         List response = restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
 
-        log.info("Response {}", Arrays.toString(Objects.requireNonNull(response).toArray()));
-
         return response;
     }
 
