@@ -48,6 +48,7 @@ public class ApplicationConfig {
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
 
         if (orthancServerConfig.getAuthEnabled()) {
+            log.info("Set basic authentication - User: {}, Pass: {}", orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
             builder.basicAuthentication(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
         }
 
