@@ -46,12 +46,6 @@ public class OrthancClient {
 
         HttpEntity<FindRequestModel> request = new HttpEntity<>(findRequestModel);
 
-        if (orthancServerConfig.getAuthEnabled()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
-            request = new HttpEntity<>(findRequestModel, headers);
-        }
-
         return restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
     }
 
@@ -64,16 +58,6 @@ public class OrthancClient {
                 .path(orthancServerConfig.getEndpoints().get("instances"))
                 .buildAndExpand(instance);
 
-        HttpEntity request = new HttpEntity<>(new HttpHeaders());
-        if (orthancServerConfig.getAuthEnabled()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
-            request = new HttpEntity<>(headers);
-        }
-
-        ResponseEntity<byte[]> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.GET, request, byte[].class);
-
-
-        return response.getBody();
+        return restTemplate.getForObject(uriComponents.toUri(), byte[].class);
     }
 }

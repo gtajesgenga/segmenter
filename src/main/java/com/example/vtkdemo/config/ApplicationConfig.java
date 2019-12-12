@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,9 @@ public class ApplicationConfig {
 
     Boolean restTemplateLogin;
 
+    @Autowired
+    OrthancServerConfig orthancServerConfig;
+
     @PostConstruct
     private void initialize() {
         try {
@@ -42,8 +46,12 @@ public class ApplicationConfig {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        RestTemplate restTemplate = builder
-                .build();
+
+        if (orthancServerConfig.getAuthEnabled()) {
+            builder.basicAuthentication(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
+        }
+
+        RestTemplate restTemplate = builder.build();
         if (restTemplateLogin) {
             restTemplate.setInterceptors(Collections.singletonList(new LoggingRequestInterceptor()));
         }
