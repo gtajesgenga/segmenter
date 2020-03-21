@@ -15,6 +15,7 @@ import org.itk.simple.SimpleITK;
 import org.itk.simple.VectorString;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
+import vtk.*;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
@@ -28,6 +29,21 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 public class VtkService {
+
+    static
+    {
+        if (!vtkNativeLibrary.LoadAllNativeLibraries())
+        {
+            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
+            {
+                if (!lib.IsLoaded())
+                {
+                    System.out.println(lib.GetLibraryName() + " not loaded");
+                }
+            }
+        }
+        vtkNativeLibrary.DisableOutputWindow(null);
+    }
 
     private final Stack<Image> images = new Stack<>();
 
@@ -88,7 +104,28 @@ public class VtkService {
                 processFilter(filter);
             }
 
-            SimpleITK.writeImage(images.peek(), Paths.get(path.toString(), "out.vtk").toString());
+            SimpleITK.writeImage(images.peek(), Paths.get(path.toString(), "generated.vtk").toString());
+
+            // Read the file
+            vtkStructuredPointsReader reader = new vtkStructuredPointsReader();
+            reader.SetFileName(Paths.get(path.toString(), "generated.vtk").toString());
+            reader.Update();
+
+            vtkContourFilter contourFilter = new vtkContourFilter();
+            contourFilter.SetInputData(reader.GetOutput());
+            contourFilter.SetValue(0, 1.0);
+
+            // Create a mapper and actor
+            vtkPolyDataMapper mapper = new vtkPolyDataMapper();
+            mapper.SetInputConnection(contourFilter.GetOutputPort());
+            mapper.ScalarVisibilityOff();
+            //mapper.SetScalarModeToDefault();
+
+            vtkPolyDataWriter writer = new vtkPolyDataWriter();
+            writer.SetFileName(Paths.get(path.toString(), "out.vtk").toString());
+            writer.SetInputConnection(contourFilter.GetOutputPort());
+            writer.SetFileTypeToBinary();
+            writer.Write();
 
             try {
                 return IOUtils.toByteArray(new FileInputStream(new File(Paths.get(path.toString(), "out.vtk").toString())));
@@ -123,7 +160,7 @@ public class VtkService {
         }
     }
 
-    private static void processMethod(Object instance, Method method) {
+    private void processMethod(Object instance, Method method) {
         try {
             log.debug("Processing method: {}", method.toString());
             instance.getClass().getMethod(method.getName(), getParamsTypes(method.getParameters())).invoke(instance, getParamsValues(method.getParameters()));
@@ -138,7 +175,7 @@ public class VtkService {
         }
     }
 
-    private static Object[] getParamsValues(List<Parameter> parameters) {
+    private Object[] getParamsValues(List<Parameter> parameters) {
         return parameters.stream()
                 .map(parameter -> {
                     try {
@@ -163,12 +200,13 @@ public class VtkService {
                 }).toArray();
     }
 
-    private static Object processValue(Parameter parameter) {
+    private Object processValue(Parameter parameter) {
         if (parameter.getMultidimensional() != null) {
             try {
                 log.debug("Processing values for parameter: {}", parameter.toString());
                 String[] strArray = parameter.getValue().replace("[", "").replace("]", "").split(",");
 
+                //TODO porcentual
                 Object instance = parameter.getDefaultCasting().getConstructor(long.class).newInstance(strArray.length);
 
                 var ref = new Object() {
@@ -177,9 +215,16 @@ public class VtkService {
                 Stream.of(strArray)
                         .forEach(s -> {
                             try {
+                                Object value;
+                                if (s.endsWith("%")) {
+                                    value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s.replace("%", ""));
+                                    value = Math.round(images.peek().getSize().get(ref.i) * Long.valueOf(value.toString()) / 100);
+                                } else {
+                                    value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s);
+                                }
                                 instance.getClass().getMethod("set", int.class, parameter.getMultidimensionalClass()
                                         .getMethod(parameter.getMultidimensionalClass().getSimpleName().toLowerCase().replace("integer", "int") + "Value").getReturnType())
-                                        .invoke(instance, ref.i, parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s));
+                                        .invoke(instance, ref.i, value);
                             ref.i++;
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
@@ -207,7 +252,7 @@ public class VtkService {
         return parameter.getValue();
     }
 
-    private static Class<?>[] getParamsTypes(List<Parameter> parameters) {
+    private Class<?>[] getParamsTypes(List<Parameter> parameters) {
         return parameters.stream()
                 .map(Parameter::getDefaultCasting)
                 .map(clazz -> {

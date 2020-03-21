@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.BufferedReader;
@@ -69,8 +68,8 @@ public class PipelineDtoEntityControllerTest {
 
     @Test
     public void testPostMethod() {
-        ResponseEntity<byte[]> result = vtkController.getVTK("1.2.840.113619.2.55.1.1762927707.1872.1482485885.841",
-                "1.2.840.113619.2.80.975520672.24749.1482491986.1.4.1",
+        ResponseEntity<byte[]> result = vtkController.getVTK("1.3.12.2.1107.5.1.4.79090.30000019050611371988300000022",
+                "1.3.12.2.1107.5.1.4.79090.30000019050611410881700005482",
                 id);
         try {
             assertThat(IOUtils.toByteArray(this.getClass().getResourceAsStream("/test.vtk")), equalTo(result.getBody()));

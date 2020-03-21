@@ -28,7 +28,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        exclude: "*"
 
 application:
   tempFolder: ${BUILD_DIR:.}/tmp
@@ -43,3 +43,6 @@ servers:
     endpoints:
       find: "/tools/find/"
       instances: "/instances/{instance}/file"
+    auth-Enabled: true
+    username: orthanc
+    password: 0rth4ncP4ssw0rd

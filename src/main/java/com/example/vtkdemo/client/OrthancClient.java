@@ -14,9 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -56,9 +54,7 @@ public class OrthancClient {
             request = new HttpEntity<>(findRequestModel, headers);
         }
 
-        List response = restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
-
-        return response;
+        return restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
     }
 
     public byte[] fetchInstance(String instance) {
