@@ -23,6 +23,7 @@ logging:
     root: INFO
     org.springframework: INFO
     com.example.vtkdemo: DEBUG
+    org.atmosphere: WARN
 
 management:
   endpoints:
@@ -46,3 +47,10 @@ servers:
     auth-Enabled: true
     username: orthanc
     password: 0rth4ncP4ssw0rd
+
+server:
+  port: 8080
+
+# Ensure application is run in Vaadin 14/npm mode
+vaadin:
+  compatibilityMode: false
