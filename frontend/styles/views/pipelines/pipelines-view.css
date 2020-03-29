@@ -52,7 +52,7 @@
     font-size: xx-large;
 }
 
-#filter-wrapper {
-    position: absolute;
-    left: 0;
+#filtertext-wrapper {
+    flex-grow: 1;
+    -webkit-flex-grow: 1;
 }

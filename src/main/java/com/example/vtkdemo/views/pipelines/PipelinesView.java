@@ -1,19 +1,25 @@
 package com.example.vtkdemo.views.pipelines;
 
 import com.example.vtkdemo.entity.PipelineEntity;
-import com.example.vtkdemo.repository.PipelineRepository;
+import com.example.vtkdemo.model.PipelineRequest;
+import com.example.vtkdemo.service.PipelineService;
+import com.example.vtkdemo.views.filters.FiltersView;
 import com.example.vtkdemo.views.main.MainView;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -27,6 +33,7 @@ import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Route(value = "pipelines", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
@@ -35,7 +42,7 @@ import java.util.Objects;
 public class PipelinesView extends Div implements AfterNavigationObserver {
 
     @Autowired
-    private PipelineRepository repository;
+    private PipelineService service;
 
     private SplitLayout splitLayout;
     private Grid<PipelineEntity> pipelines;
@@ -43,9 +50,9 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
     private TextField id = new TextField();
     private TextField name = new TextField();
 
-    private TextField filter = new TextField();
+    private TextField filterText = new TextField();
 
-    private Button addNew = new Button("Add new...");
+    private Button addNew = new Button("Add new pipeline");
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
     private Button delete = new Button("Delete");
@@ -57,12 +64,17 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
         setId("pipelines-view");
         // Configure Grid
         pipelines = new Grid<>(PipelineEntity.class);
-        pipelines.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+//        pipelines.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         pipelines.setHeightByRows(true);
         pipelines.setMaxHeight("80%");
         pipelines.setColumns("id", "name");
+        pipelines.addComponentColumn(this::createFiltersButton).setWidth("70px").setFlexGrow(0)
+                .setTextAlign(ColumnTextAlign.CENTER);
+        pipelines.getColumnByKey("id").setFlexGrow(0);
+        pipelines.getColumnByKey("name").setFlexGrow(1);
         //when a row is selected or deselected, populate form
         pipelines.asSingleSelect().addValueChangeListener(event -> populateForm(event.getValue()));
+        pipelines.addItemDoubleClickListener(e -> navigateToFilters(e.getItem()));
 
         // Configure Form
         binder = new Binder<>(PipelineEntity.class);
@@ -83,10 +95,18 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
 
         save.addClickListener(e -> {
             if (binder.writeBeanIfValid(pipeline)) {
-                repository.save(pipeline);
+                PipelineRequest request = new PipelineRequest();
+                request.setName(pipeline.getName());
+                request.setPipelineDto(pipeline.getPipelineDto());
+
+                if (pipeline.getId() == null) {
+                    service.createPipeline(request);
+                } else {
+                    service.updateById(pipeline.getId(), request);
+                }
                 Notification.show("Saved!");
-                listPipelines(filter.getValue());
-                pipelines.setItems(repository.findAll());
+                listPipelines(filterText.getValue());
+                pipelines.setItems(service.findAll());
                 ((Div)splitLayout.getSecondaryComponent()).setEnabled(false);
             } else {
                 Notification.show("Data invalid");
@@ -105,8 +125,8 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
             dialog.add(content);
 
             NativeButton confirmButton = new NativeButton("Confirm", event -> {
-                repository.delete(pipeline);
-                listPipelines(filter.getValue());
+                service.deleteById(pipeline.getId());
+                listPipelines(filterText.getValue());
                 dialog.close();
             });
             NativeButton cancelButton = new NativeButton("Cancel", event -> dialog.close());
@@ -116,11 +136,24 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
 
         splitLayout = new SplitLayout();
         splitLayout.setSizeFull();
+        splitLayout.setSecondaryStyle("minWidth", "30%");
 
         createGridLayout(splitLayout);
         createEditorLayout(splitLayout);
 
         add(splitLayout);
+    }
+
+    private Component createFiltersButton(PipelineEntity pipelineEntity) {
+        Button button = new Button(new Icon(VaadinIcon.EDIT), clickEvent -> navigateToFilters(pipelineEntity));
+        button.setClassName("delete-button");
+        button.addThemeName("small");
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        return button;
+    }
+
+    private void navigateToFilters(PipelineEntity pipelineEntity) {
+        UI.getCurrent().navigate(FiltersView.class, pipelineEntity.getId());
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
@@ -166,14 +199,14 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
 
         addNew.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        filter.setPlaceholder("Filter by pipeline name");
-        filter.setValueChangeMode(ValueChangeMode.EAGER);
-        filter.addValueChangeListener(e -> listPipelines(e.getValue()));
+        filterText.setPlaceholder("Filter by pipeline name");
+        filterText.setValueChangeMode(ValueChangeMode.EAGER);
+        filterText.addValueChangeListener(e -> listPipelines(e.getValue()));
 
         Div filterDiv = new Div();
-        filterDiv.setId("filter-wrapper");
+        filterDiv.setId("filtertext-wrapper");
         filterDiv.setSizeUndefined();
-        filterDiv.add(filter);
+        filterDiv.add(filterText);
 
         HorizontalLayout actionsLayout = new HorizontalLayout();
         actionsLayout.setId("actions-layout");
@@ -201,9 +234,11 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
 
     private void listPipelines(String filterText) {
         if(StringUtils.isEmpty(filterText)) {
-            pipelines.setItems(repository.findAll());
+            pipelines.setItems(service.findAll());
         } else {
-            pipelines.setItems(repository.findByNameContainingIgnoreCase(filterText));
+            pipelines.setItems(service.findAll().stream()
+                    .filter(pipelineEntity -> pipelineEntity.getName().matches("^(?i).*" + filterText + ".*$"))
+                    .collect(Collectors.toList()));
         }
     }
 

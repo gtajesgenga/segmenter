@@ -1,7 +1,6 @@
 package com.example.vtkdemo.views.main;
 
 import com.example.vtkdemo.views.filters.FiltersView;
-import com.example.vtkdemo.views.methods.MethodsView;
 import com.example.vtkdemo.views.pipelines.PipelinesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -12,8 +11,8 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RoutePrefix;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
@@ -27,6 +26,7 @@ import java.util.Optional;
 @JsModule("./styles/shared-styles.js")
 //@PWA(name = "VtkCrud", shortName = "VtkCrud")
 @Theme(value = Lumo.class, variant = Lumo.LIGHT)
+@RoutePrefix("ui")
 public class MainView extends AppLayout {
 
     private final Tabs menu;
@@ -50,7 +50,7 @@ public class MainView extends AppLayout {
     private static Tab[] getAvailableTabs() {
         final List<Tab> tabs = new ArrayList<>();
         tabs.add(createTab("Pipelines", PipelinesView.class));
-//        tabs.add(createTab("Filters", FiltersView.class));
+        tabs.add(createTab("Filters", FiltersView.class));
 //        tabs.add(createTab("Methods", MethodsView.class));
         return tabs.toArray(new Tab[tabs.size()]);
     }
