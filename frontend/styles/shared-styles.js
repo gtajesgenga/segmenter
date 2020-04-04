@@ -42,6 +42,9 @@ $_documentContainer.innerHTML = `
     vaadin-app-layout vaadin-tab a:hover {
       text-decoration: none;
     }
+    vaadin-app-layout #page-title {
+        font-size: xx-large;
+    }
   </style>
 </custom-style>
 

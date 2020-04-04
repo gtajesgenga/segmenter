@@ -1,12 +1,14 @@
 package com.example.vtkdemo.views.main;
 
 import com.example.vtkdemo.views.filters.FiltersView;
+import com.example.vtkdemo.views.methods.MethodsView;
 import com.example.vtkdemo.views.pipelines.PipelinesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -15,6 +17,7 @@ import com.vaadin.flow.router.RoutePrefix;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +33,14 @@ import java.util.Optional;
 public class MainView extends AppLayout {
 
     private final Tabs menu;
+    private final Label title;
 
     public MainView() {
+        title = new Label();
+        title.setId("page-title");
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, new DrawerToggle());
+        addToNavbar(true, title);
         menu = createMenuTabs();
         addToDrawer(menu);
     }
@@ -82,6 +89,10 @@ public class MainView extends AppLayout {
             Component child = tab.getChildren().findFirst().get();
             return child instanceof RouterLink && ((RouterLink) child).getHref().equals(target);
         }).findFirst();
-        tabToSelect.ifPresent(tab -> menu.setSelectedTab((Tab) tab));
+        title.setText(StringUtils.capitalize(target.substring(target.indexOf('/')+1)));
+        tabToSelect.ifPresent(tab -> {
+            title.setText(tab.getElement().getChildren().findFirst().get().getText());
+            menu.setSelectedTab((Tab) tab);
+        });
     }
 }

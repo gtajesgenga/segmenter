@@ -64,7 +64,7 @@ public class FilterService {
 
     public static Optional<FilterDto> find(String className) {
         return getSubtypes().stream()
-                .filter(clazz -> clazz.getSimpleName().equals(className))
+                .filter(clazz -> clazz.getCanonicalName().equals(className) || clazz.getSimpleName().equals(className))
                 .map(clazz -> FilterDto.builder()
                         .filterClass(clazz.getCanonicalName())
                         .methods(getMethods(clazz.getMethods()))

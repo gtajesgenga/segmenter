@@ -7,21 +7,23 @@ import com.example.vtkdemo.model.PipelineRequest;
 import com.example.vtkdemo.service.FilterService;
 import com.example.vtkdemo.service.PipelineService;
 import com.example.vtkdemo.views.main.MainView;
+import com.example.vtkdemo.views.methods.MethodsView;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,6 +34,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,7 +46,6 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
 
     private final SimpleBooleanProperty listChanged;
 
-    @Autowired
     private PipelineService pipelineService;
 
     private Grid<FilterDto> filters;
@@ -55,9 +57,10 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
     private Select<PipelineEntity> pipelineEntitySelect;
     private FilterDto draggedItem;
 
-    public FiltersView() {
+    public FiltersView(@Autowired PipelineService service) {
         setId("filters-view");
 
+        pipelineService = service;
         listChanged = new SimpleBooleanProperty(false);
 
         // Configure Grid
@@ -65,15 +68,18 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
 //        filters.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         filters.setMaxHeight("80%");
         filters.setSelectionMode(Grid.SelectionMode.NONE);
-        filters.addColumn(i -> currentFilters.indexOf(i)).setHeader("Order").setKey("order");
+        filters.addColumn(i -> currentFilters.indexOf(i) + 1).setHeader("Order").setKey("order");
         filters.addColumn(filterDto -> filterDto.getFilterClass().substring(filterDto.getFilterClass().lastIndexOf('.') + 1))
                 .setHeader("Filter Class").setKey("filterClass");
-        filters.addComponentColumn(filterDto -> createRemoveButton(filters, filterDto)).setWidth("70px").setFlexGrow(0)
+        filters.addComponentColumn(this::createMethodsButton).setWidth("70px").setFlexGrow(0)
+                .setTextAlign(ColumnTextAlign.CENTER);
+        filters.addComponentColumn(this::createDeleteButton).setWidth("70px").setFlexGrow(0)
                 .setTextAlign(ColumnTextAlign.CENTER);
         filters.getColumnByKey("order").setFlexGrow(0);
         filters.getColumnByKey("filterClass").setFlexGrow(1);
         filters.getColumns().forEach(col -> col.setSortable(false));
         filters.setRowsDraggable(true);
+        filters.addItemDoubleClickListener(e -> navigateToMethods(e.getItem()));
 
         filters.addDragStartListener(event -> {
             draggedItem = event.getDraggedItems().get(0);
@@ -101,12 +107,43 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
         createGridLayout();
     }
 
-    private Component createRemoveButton(Grid<FilterDto> filters, FilterDto filterDto) {
+    private Component createMethodsButton(FilterDto filterDto) {
+        Button button = new Button(new Icon(VaadinIcon.EDIT), clickEvent -> navigateToMethods(filterDto));
+        button.setClassName("delete-button");
+        button.addThemeName("small");
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        return button;
+    }
+
+    private void navigateToMethods(FilterDto filterDto) {
+        UI.getCurrent().navigate(MethodsView.class, MessageFormat.format("{0}-{1}", currentPipeline.getId(), filterDto.getUuid()));
+    }
+
+    private Component createDeleteButton(FilterDto filterDto) {
         Button button = new Button(new Icon(VaadinIcon.TRASH), clickEvent -> {
-            ListDataProvider<FilterDto> dataProvider = (ListDataProvider<FilterDto>) filters
-                    .getDataProvider();
-            dataProvider.getItems().remove(filterDto);
-            dataProvider.refreshAll();
+            Dialog dialog = new Dialog();
+
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
+
+            Div content = new Div();
+
+            content.setText(MessageFormat.format("Do you want to remove filter {0}?", filterDto.getFilterClass()));
+            dialog.add(content);
+
+            Button confirmButton = new Button("Confirm", event -> {
+                ListDataProvider<FilterDto> dataProvider = (ListDataProvider<FilterDto>) filters
+                        .getDataProvider();
+                dataProvider.getItems().remove(filterDto);
+                dataProvider.refreshAll();
+                listChanged.set(true);
+                dialog.close();
+            });
+            confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            Button cancelButton = new Button("Cancel", event -> dialog.close());
+            cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            dialog.add(confirmButton, cancelButton);
+            dialog.open();
         });
         button.setClassName("delete-button");
         button.addThemeName("small");
@@ -120,17 +157,6 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
         wrapper.setId("wrapper");
         wrapper.setSizeFull();
 
-        Label title = new Label();
-        title.setText("Filters");
-        title.setId("page-title");
-
-        HorizontalLayout titleLayout = new HorizontalLayout();
-        titleLayout.setId("button-layout");
-        titleLayout.setWidthFull();
-        titleLayout.setSpacing(true);
-        titleLayout.add(title);
-        titleLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
-
         pipelineEntitySelect = new Select<>();
         pipelineEntitySelect.setPlaceholder("Select pipeline");
         pipelineEntitySelect.setItemLabelGenerator(PipelineEntity::getName);
@@ -142,17 +168,22 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
         FormLayout pipelineSelectLayout = new FormLayout();
         pipelineSelectLayout.addFormItem(pipelineEntitySelect, "Pipeline");
 
-        Select<FilterDto> availableFiltersSelect = new Select<>();
+        ComboBox<FilterDto> availableFiltersSelect = new ComboBox<>();
         availableFiltersSelect.setPlaceholder("Select filter to add...");
         availableFiltersSelect.setItemLabelGenerator(item -> item.getFilterClass()
                 .substring(item.getFilterClass().lastIndexOf('.') + 1));
         availableFiltersSelect.setItems(FilterService.findAll());
+        availableFiltersSelect.setClearButtonVisible(true);
 
         Button addNew = new Button("Add new filter");
         addNew.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addNew.addClickListener(e -> {
             if (availableFiltersSelect.getValue() != null) {
-                currentFilters.add(availableFiltersSelect.getValue());
+                FilterDto filter = FilterDto.builder()
+                        .filterClass(availableFiltersSelect.getValue().getFilterClass())
+                        .methods(null)
+                        .build();
+                currentFilters.add(filter);
                 filters.getDataProvider().refreshAll();
                 listChanged.set(true);
             }
@@ -164,7 +195,7 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         save.addClickListener(e -> {
             if (currentPipeline != null && currentFilters != null) {
-                PipelineDto pipelineDto = Optional.of(currentPipeline.getPipelineDto()).orElse(new PipelineDto());
+                PipelineDto pipelineDto = Optional.ofNullable(currentPipeline.getPipelineDto()).orElse(new PipelineDto());
                 pipelineDto.setFilters(currentFilters);
                 currentPipeline.setPipelineDto(pipelineDto);
 
@@ -173,6 +204,7 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
                 request.setPipelineDto(currentPipeline.getPipelineDto());
 
                 pipelineService.updateById(currentPipeline.getId(), request);
+                listChanged.set(false);
             }
         });
 
@@ -197,7 +229,7 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
         actionsLayout.setSpacing(true);
         actionsLayout.add(filterDiv, availableFiltersSelect, addNew, save);
 
-        wrapper.add(titleLayout, pipelineSelectLayout, actionsLayout, filters);
+        wrapper.add(pipelineSelectLayout, actionsLayout, filters);
 
         add(wrapper);
     }
@@ -206,16 +238,16 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
         if (currentPipeline == null || currentPipeline.getPipelineDto() == null) {
             currentFilters = Lists.newArrayList();
         } else {
+            currentFilters = Optional.ofNullable(currentPipeline.getPipelineDto().getFilters()).orElse(Lists.newArrayList());
             if (StringUtils.isEmpty(filterText)) {
-                currentFilters = currentPipeline.getPipelineDto().getFilters();
+                filters.setItems(currentFilters);
             } else {
-                currentFilters = currentPipeline.getPipelineDto().getFilters().stream()
+                filters.setItems(currentFilters.stream()
                         .filter(filterDto -> filterDto.getFilterClass().matches("^(?i).*" + filterText + ".*$"))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toList()));
             }
         }
         listChanged.set(false);
-        filters.setItems(currentFilters);
     }
 
     @Override

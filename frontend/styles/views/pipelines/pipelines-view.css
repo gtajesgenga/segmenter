@@ -48,10 +48,6 @@
     flex-grow: 0;
 }
 
-#page-title {
-    font-size: xx-large;
-}
-
 #filtertext-wrapper {
     flex-grow: 1;
     -webkit-flex-grow: 1;
