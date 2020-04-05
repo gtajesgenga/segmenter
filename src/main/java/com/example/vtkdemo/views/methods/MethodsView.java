@@ -64,7 +64,18 @@ public class MethodsView extends Div implements HasUrlParameter<String> {
     }
 
     private Component createEditButton(Method method) {
-        Button button = new Button(new Icon(VaadinIcon.EDIT), clickEvent -> {});
+        Button button = new Button(new Icon(VaadinIcon.EDIT), event -> {
+            MethodEditor editor = new MethodEditor(method, (result, m) -> {
+                if (result) {
+                    method.setParameters(m.getParameters());
+                    listChanged.set(true);
+                }
+            });
+            editor.setCloseOnEsc(false);
+            editor.setCloseOnOutsideClick(false);
+
+            editor.open();
+        });
         button.setClassName("delete-button");
         button.addThemeName("small");
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -121,7 +132,7 @@ public class MethodsView extends Div implements HasUrlParameter<String> {
             if (availableMethodsSelect.getValue() != null) {
                 Method method = Method.builder()
                         .name(availableMethodsSelect.getValue().getName())
-                        .parameters(null)
+                        .parameters(availableMethodsSelect.getValue().getParameters())
                         .build();
                 currentMethods.add(method);
                 methods.getDataProvider().refreshAll();

@@ -1,7 +1,6 @@
 package com.example.vtkdemo.views.main;
 
 import com.example.vtkdemo.views.filters.FiltersView;
-import com.example.vtkdemo.views.methods.MethodsView;
 import com.example.vtkdemo.views.pipelines.PipelinesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;

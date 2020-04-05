@@ -9,11 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class Parameter {
+
+    private String name;
 
     @Setter(AccessLevel.NONE)
     @JsonIgnore
+    @Builder.Default
     private Class defaultCasting = Number.class;
 
     @Setter(AccessLevel.NONE)
@@ -26,6 +28,15 @@ public class Parameter {
     private String casting;
 
     private String value;
+
+    public Parameter(String name, Class defaultCasting, Class multidimensionalClass, String multidimensional, String casting, String value) {
+        this.name = name;
+        this.defaultCasting = defaultCasting;
+        this.multidimensionalClass = multidimensionalClass;
+        this.multidimensional = multidimensional;
+        this.setCasting(casting);
+        this.value = value;
+    }
 
     public void setCasting(String casting) {
         this.casting = casting;
