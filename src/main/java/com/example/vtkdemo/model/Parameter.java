@@ -33,7 +33,7 @@ public class Parameter {
         this.name = name;
         this.defaultCasting = defaultCasting;
         this.multidimensionalClass = multidimensionalClass;
-        this.multidimensional = multidimensional;
+        this.setMultidimensional(multidimensional);
         this.setCasting(casting);
         this.value = value;
     }
@@ -52,6 +52,7 @@ public class Parameter {
 
         if (this.multidimensional != null) {
             try {
+                //TODO arreglar Int en multidimensional
                 this.multidimensionalClass = Class.forName(this.multidimensional);
             } catch (ClassNotFoundException e) {
                 log.error("Casting class doesn't exists.", e);

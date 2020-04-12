@@ -1,7 +1,6 @@
 package com.example.vtkdemo.views.methods;
 
 import com.example.vtkdemo.model.Method;
-import com.example.vtkdemo.model.Parameter;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,11 +13,8 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
@@ -97,12 +93,12 @@ public class MethodEditor extends Dialog {
                                     ((NumberField) field).setPlaceholder("short value");
                                     break;
                                 case "Int":
-                                    ((NumberField) field).setMin(Integer.MIN_VALUE);
+                                    ((NumberField) field).setMin(Double.valueOf(String.valueOf(Integer.MIN_VALUE)));
                                     ((NumberField) field).setMax(Integer.MAX_VALUE);
                                     ((NumberField) field).setPlaceholder("int value");
                                     break;
                                 case "Long":
-                                    ((NumberField) field).setMin(Long.MIN_VALUE);
+                                    ((NumberField) field).setMin(Double.valueOf(String.valueOf(Long.MIN_VALUE)));
                                     ((NumberField) field).setMax(Long.MAX_VALUE);
                                     ((NumberField) field).setPlaceholder("long value");
                                     break;
@@ -112,18 +108,18 @@ public class MethodEditor extends Dialog {
 
                             switch (parameter.getDefaultCasting().getSimpleName()) {
                                 case "Float":
-                                    ((NumberField) field).setMin(Float.MIN_VALUE);
+                                    ((NumberField) field).setMin(Double.valueOf(String.valueOf(Float.MIN_VALUE)));
                                     ((NumberField) field).setMax(Float.MAX_VALUE);
                                     ((NumberField) field).setPlaceholder("float value");
                                     break;
                                 case "Double":
-                                    ((NumberField) field).setMin(Double.MIN_VALUE);
+                                    ((NumberField) field).setMin(-Double.MAX_VALUE);
                                     ((NumberField) field).setMax(Double.MAX_VALUE);
                                     ((NumberField) field).setPlaceholder("double value");
                                     break;
                             }
                         }
-                        field.setValue(Double.valueOf(parameter.getValue()));
+                        field.setValue(Double.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0.0"));
                     } else if (Boolean.class.isAssignableFrom(parameter.getDefaultCasting())) {
                         field = new Checkbox();
                         field.setValue(Boolean.valueOf(parameter.getValue()));
@@ -131,7 +127,7 @@ public class MethodEditor extends Dialog {
                 } else {
                     field = new TextField();
                     ((TextField) field).setPlaceholder("tern numeric value or percent: x%,y%,z%");
-                    field.setValue(String.valueOf(parameter.getValue()));
+                    field.setValue(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "");
                 }
                 field.addValueChangeListener(event -> parameter.setValue(String.valueOf(event.getValue())));
 

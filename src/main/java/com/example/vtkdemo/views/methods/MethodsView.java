@@ -19,11 +19,13 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.spring.annotation.UIScope;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 @Route(value = "methods", layout = MainView.class)
 @PageTitle("Methods")
 @CssImport("styles/views/methods/methods-view.css")
+@UIScope
 public class MethodsView extends Div implements HasUrlParameter<String> {
 
     private final PipelineService pipelineService;
@@ -153,6 +156,8 @@ public class MethodsView extends Div implements HasUrlParameter<String> {
                 request.setPipelineDto(currentPipeline.getPipelineDto());
 
                 pipelineService.updateById(currentPipeline.getId(), request);
+                listChanged.set(false);
+                Notification.show("Saved!");
             }
         });
 

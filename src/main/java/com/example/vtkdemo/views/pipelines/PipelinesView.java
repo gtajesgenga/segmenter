@@ -26,6 +26,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Pipelines")
 @CssImport("styles/views/pipelines/pipelines-view.css")
+@UIScope
 public class PipelinesView extends Div implements AfterNavigationObserver {
 
     @Autowired
@@ -161,6 +163,7 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
     }
 
     private void navigateToFilters(PipelineEntity pipelineEntity) {
+        getParent().ifPresent(parent -> MainView.navigation.push(RouteConfiguration.forSessionScope().getUrl(PipelinesView.class)));
         UI.getCurrent().navigate(FiltersView.class, pipelineEntity.getId());
     }
 
@@ -222,7 +225,6 @@ public class PipelinesView extends Div implements AfterNavigationObserver {
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-
         // Lazy init of the grid items, happens only when we are sure the view will be
         // shown to the user
         listPipelines(null);

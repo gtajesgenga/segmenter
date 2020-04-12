@@ -3,10 +3,10 @@ package com.example.vtkdemo.service;
 import com.example.vtkdemo.model.FilterDto;
 import com.example.vtkdemo.model.Method;
 import com.example.vtkdemo.model.Parameter;
+import javassist.Modifier;
 import org.apache.commons.lang3.ClassUtils;
 import org.itk.simple.ImageFilter_1;
 import org.reflections.Reflections;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,6 +46,7 @@ public class FilterService {
 
     private static List<Method> getMethods(java.lang.reflect.Method[] methods) {
         return Stream.of(methods)
+                .filter(method -> Modifier.isPublic(method.getModifiers()))
                 .filter(method -> method.getName().startsWith("set"))
                 .map(method ->
                         Method.builder()
@@ -71,8 +72,9 @@ public class FilterService {
 
                                 if (Objects.nonNull(setMethod)) {
                                     Class paramClazz = setMethod.getParameterTypes()[1];
-                                    parambuilder.multidimensional(ClassUtils.isPrimitiveOrWrapper(paramClazz) ? "java.lang." + StringUtils.capitalize(paramClazz.getSimpleName()) :
-                                            paramClazz.getCanonicalName());
+                                    parambuilder.multidimensional(paramClazz.isPrimitive() ? ClassUtils.primitiveToWrapper(paramClazz).getCanonicalName() : paramClazz.getCanonicalName());
+//                                    parambuilder.multidimensional(ClassUtils.isPrimitiveOrWrapper(paramClazz) ? "java.lang." + StringUtils.capitalize(paramClazz.getSimpleName()) :
+//                                            paramClazz.getCanonicalName());
                                 }
                             }
                             return parambuilder.build();

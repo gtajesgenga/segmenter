@@ -4,10 +4,15 @@ import com.example.vtkdemo.views.filters.FiltersView;
 import com.example.vtkdemo.views.pipelines.PipelinesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -21,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Stack;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -31,14 +37,45 @@ import java.util.Optional;
 @RoutePrefix("ui")
 public class MainView extends AppLayout {
 
+    private static Button prev = new Button("Go back", new Icon(VaadinIcon.BACKSPACE_A));
+    public static Stack<String> navigation = new Stack<>() {
+
+        @Override
+        public String push(String item) {
+            String res = super.push(item);
+            update();
+            return res;
+        }
+
+        @Override
+        public String pop() {
+            String res = super.pop();
+            update();
+            return res;
+        }
+
+        private void update() {
+            prev.setVisible(!this.isEmpty());
+        }
+    };
+
     private final Tabs menu;
     private final Label title;
 
     public MainView() {
         title = new Label();
         title.setId("page-title");
+//        prev.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        prev.setVisible(!navigation.isEmpty());
+        prev.addClickListener(e -> {
+           if (!navigation.isEmpty()) {
+               UI.getCurrent().navigate(navigation.pop());
+           }
+        });
+
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, new DrawerToggle());
+        addToNavbar(true, prev);
         addToNavbar(true, title);
         menu = createMenuTabs();
         addToDrawer(menu);
@@ -57,7 +94,6 @@ public class MainView extends AppLayout {
         final List<Tab> tabs = new ArrayList<>();
         tabs.add(createTab("Pipelines", PipelinesView.class));
         tabs.add(createTab("Filters", FiltersView.class));
-//        tabs.add(createTab("Methods", MethodsView.class));
         return tabs.toArray(new Tab[tabs.size()]);
     }
 

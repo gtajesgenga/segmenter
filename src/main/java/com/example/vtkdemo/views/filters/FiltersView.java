@@ -24,12 +24,14 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.spring.annotation.UIScope;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
 @Route(value = "filters", layout = MainView.class)
 @PageTitle("Filters")
 @CssImport("styles/views/filters/filters-view.css")
+@UIScope
 public class FiltersView extends Div implements HasUrlParameter<Long> {
 
     private final SimpleBooleanProperty listChanged;
@@ -116,6 +119,7 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
     }
 
     private void navigateToMethods(FilterDto filterDto) {
+        getParent().ifPresent(parent -> MainView.navigation.push(RouteConfiguration.forSessionScope().getUrl(FiltersView.class, currentPipeline.getId())));
         UI.getCurrent().navigate(MethodsView.class, MessageFormat.format("{0}-{1}", currentPipeline.getId(), filterDto.getUuid()));
     }
 
@@ -205,12 +209,11 @@ public class FiltersView extends Div implements HasUrlParameter<Long> {
 
                 pipelineService.updateById(currentPipeline.getId(), request);
                 listChanged.set(false);
+                Notification.show("Saved!");
             }
         });
 
-        listChanged.addListener((observable, oldVal, newVal) -> {
-            save.setEnabled(newVal);
-        });
+        listChanged.addListener((observable, oldVal, newVal) -> save.setEnabled(newVal));
 
 
         filterText.setPlaceholder("Filter by filter class name");
