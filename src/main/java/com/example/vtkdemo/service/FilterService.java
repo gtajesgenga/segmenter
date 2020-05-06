@@ -3,10 +3,10 @@ package com.example.vtkdemo.service;
 import com.example.vtkdemo.model.FilterDto;
 import com.example.vtkdemo.model.Method;
 import com.example.vtkdemo.model.Parameter;
+import javassist.Modifier;
+import org.apache.commons.lang3.ClassUtils;
 import org.itk.simple.ImageFilter_1;
 import org.reflections.Reflections;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,20 +14,39 @@ import java.util.stream.Stream;
 
 public class FilterService {
 
+    private static Map<String, List<Method>> filtersMap;
+
+    static {
+        filtersMap = getSubtypes().stream()
+                .collect(Collectors.toMap(Class::getCanonicalName, clazz -> getMethods(clazz.getMethods())));
+    }
+
     public static List<FilterDto> findAll() {
         List<FilterDto> results;
 
-        results = getSubtypes().stream()
-                .map(clazz -> FilterDto.builder()
-                        .filterClass(clazz.getCanonicalName())
-                        .methods(getMethods(clazz.getMethods()))
-                ).map(FilterDto.FilterDtoBuilder::build).collect(Collectors.toList());
+        results = filtersMap.entrySet().stream()
+                .map(filter -> FilterDto.builder()
+                        .filterClass(filter.getKey())
+                        .methods(filter.getValue())
+                        .build())
+                .collect(Collectors.toList());
 
         return results;
     }
 
+    public static Optional<FilterDto> find(String className) {
+        return filtersMap.entrySet().stream()
+                .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') +1 ).equals(className))
+                .map(filter -> FilterDto.builder()
+                        .filterClass(filter.getKey())
+                        .methods(filter.getValue())
+                        .build())
+                .findFirst();
+    }
+
     private static List<Method> getMethods(java.lang.reflect.Method[] methods) {
         return Stream.of(methods)
+                .filter(method -> Modifier.isPublic(method.getModifiers()))
                 .filter(method -> method.getName().startsWith("set"))
                 .map(method ->
                         Method.builder()
@@ -40,10 +59,12 @@ public class FilterService {
         return Stream.of(parameters)
                 .map(parameter -> {
                             Parameter.ParameterBuilder parambuilder = Parameter.builder()
-                                    .casting(ClassUtils.isPrimitiveOrWrapper(parameter.getType()) ? "java.lang." + StringUtils.capitalize(parameter.getType().getSimpleName()) :
-                                            parameter.getType().getCanonicalName());
+                                    .name(parameter.getName())
+                                    .casting(parameter.getType().isPrimitive() ? ClassUtils.primitiveToWrapper(parameter.getType()).getCanonicalName() : parameter.getType().getCanonicalName());
+//                                    .casting(ClassUtils.isPrimitiveOrWrapper(parameter.getType()) ? "java.lang." + StringUtils.capitalize(parameter.getType().getSimpleName()) :
+//                                            parameter.getType().getCanonicalName());
 
-                            if (ClassUtils.hasMethod(parameter.getType(), "size")) {
+                            if (org.springframework.util.ClassUtils.hasMethod(parameter.getType(), "size")) {
                                 java.lang.reflect.Method setMethod = Arrays.stream(parameter.getType().getMethods())
                                         .filter(paramMethod -> "set".equals(paramMethod.getName()))
                                         .findFirst()
@@ -51,24 +72,15 @@ public class FilterService {
 
                                 if (Objects.nonNull(setMethod)) {
                                     Class paramClazz = setMethod.getParameterTypes()[1];
-                                    parambuilder.multidimensional(ClassUtils.isPrimitiveOrWrapper(paramClazz) ? "java.lang." + StringUtils.capitalize(paramClazz.getSimpleName()) :
-                                            paramClazz.getCanonicalName());
+                                    parambuilder.multidimensional(paramClazz.isPrimitive() ? ClassUtils.primitiveToWrapper(paramClazz).getCanonicalName() : paramClazz.getCanonicalName());
+//                                    parambuilder.multidimensional(ClassUtils.isPrimitiveOrWrapper(paramClazz) ? "java.lang." + StringUtils.capitalize(paramClazz.getSimpleName()) :
+//                                            paramClazz.getCanonicalName());
                                 }
                             }
-                            return parambuilder;
+                            return parambuilder.build();
                         }
                 )
-                .map(Parameter.ParameterBuilder::build)
                 .collect(Collectors.toList());
-    }
-
-    public static Optional<FilterDto> find(String className) {
-        return getSubtypes().stream()
-                .filter(clazz -> clazz.getSimpleName().equals(className))
-                .map(clazz -> FilterDto.builder()
-                        .filterClass(clazz.getCanonicalName())
-                        .methods(getMethods(clazz.getMethods()))
-                ).map(FilterDto.FilterDtoBuilder::build).findFirst();
     }
 
     private static Set<Class<? extends ImageFilter_1>> getSubtypes() {

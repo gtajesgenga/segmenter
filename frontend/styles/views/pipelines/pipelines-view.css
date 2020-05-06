@@ -1,0 +1,54 @@
+#pipelines-view {
+    display: block;
+    height: 100%;
+    flex-direction: column;
+}
+
+:host {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+}
+
+#editor-layout {
+    padding: var(--lumo-space-l);
+    width: 400px;
+}
+
+#actions-layout {
+    padding: var(--lumo-space-m);
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: flex-end;
+}
+
+#button-layout {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: flex-end;
+}
+
+#pipelines-view #wrapper {
+    flex-grow: 1;
+}
+
+
+.splitLayout__gridTable {
+    flex-grow: 1;
+    width: 100%;
+}
+
+.splitLayout {
+    width: 100%;
+    height: 100%;
+}
+
+.gridTable__column {
+    width: 50px;
+    flex-grow: 0;
+}
+
+#filtertext-wrapper {
+    flex-grow: 1;
+    -webkit-flex-grow: 1;
+}

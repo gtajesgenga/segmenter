@@ -206,7 +206,6 @@ public class VtkService {
                 log.debug("Processing values for parameter: {}", parameter.toString());
                 String[] strArray = parameter.getValue().replace("[", "").replace("]", "").split(",");
 
-                //TODO porcentual
                 Object instance = parameter.getDefaultCasting().getConstructor(long.class).newInstance(strArray.length);
 
                 var ref = new Object() {
