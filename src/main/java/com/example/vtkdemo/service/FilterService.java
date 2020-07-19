@@ -61,8 +61,6 @@ public class FilterService {
                             Parameter.ParameterBuilder parambuilder = Parameter.builder()
                                     .name(parameter.getName())
                                     .casting(parameter.getType().isPrimitive() ? ClassUtils.primitiveToWrapper(parameter.getType()).getCanonicalName() : parameter.getType().getCanonicalName());
-//                                    .casting(ClassUtils.isPrimitiveOrWrapper(parameter.getType()) ? "java.lang." + StringUtils.capitalize(parameter.getType().getSimpleName()) :
-//                                            parameter.getType().getCanonicalName());
 
                             if (org.springframework.util.ClassUtils.hasMethod(parameter.getType(), "size")) {
                                 java.lang.reflect.Method setMethod = Arrays.stream(parameter.getType().getMethods())
@@ -73,8 +71,6 @@ public class FilterService {
                                 if (Objects.nonNull(setMethod)) {
                                     Class paramClazz = setMethod.getParameterTypes()[1];
                                     parambuilder.multidimensional(paramClazz.isPrimitive() ? ClassUtils.primitiveToWrapper(paramClazz).getCanonicalName() : paramClazz.getCanonicalName());
-//                                    parambuilder.multidimensional(ClassUtils.isPrimitiveOrWrapper(paramClazz) ? "java.lang." + StringUtils.capitalize(paramClazz.getSimpleName()) :
-//                                            paramClazz.getCanonicalName());
                                 }
                             }
                             return parambuilder.build();

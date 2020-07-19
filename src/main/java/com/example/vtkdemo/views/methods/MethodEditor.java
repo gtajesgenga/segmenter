@@ -11,8 +11,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
@@ -83,43 +82,53 @@ public class MethodEditor extends Dialog {
                 if (StringUtils.isEmpty(parameter.getMultidimensional())) {
                     if (Number.class.isAssignableFrom(parameter.getDefaultCasting())) {
                         if (parameter.getDefaultCasting().getSimpleName().matches("^Short|Long|Int$")) {
-                            field = new NumberField();
-                            ((NumberField) field).setStep(1.0);
 
                             switch (parameter.getDefaultCasting().getSimpleName()) {
                                 case "Short":
-                                    ((NumberField) field).setMin(Short.MIN_VALUE);
-                                    ((NumberField) field).setMax(Short.MAX_VALUE);
-                                    ((NumberField) field).setPlaceholder("short value");
+                                    field = new ShortField();
+                                    ((ShortField) field).setStep((short) 1);
+                                    ((ShortField) field).setMin(Short.MIN_VALUE);
+                                    ((ShortField) field).setMax(Short.MAX_VALUE);
+                                    ((ShortField) field).setPlaceholder("short value");
+                                    field.setValue(Short.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0"));
                                     break;
                                 case "Int":
-                                    ((NumberField) field).setMin(Double.valueOf(String.valueOf(Integer.MIN_VALUE)));
-                                    ((NumberField) field).setMax(Integer.MAX_VALUE);
-                                    ((NumberField) field).setPlaceholder("int value");
+                                    field = new IntegerField();
+                                    ((IntegerField) field).setStep(1);
+                                    ((IntegerField) field).setMin(Integer.MIN_VALUE);
+                                    ((IntegerField) field).setMax(Integer.MAX_VALUE);
+                                    ((IntegerField) field).setPlaceholder("int value");
+                                    field.setValue(Integer.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0"));
                                     break;
                                 case "Long":
-                                    ((NumberField) field).setMin(Double.valueOf(String.valueOf(Long.MIN_VALUE)));
-                                    ((NumberField) field).setMax(Long.MAX_VALUE);
-                                    ((NumberField) field).setPlaceholder("long value");
+                                    field = new LongField();
+                                    ((LongField) field).setStep(1);
+                                    ((LongField) field).setMin(Long.MIN_VALUE);
+                                    ((LongField) field).setMax(Long.MAX_VALUE);
+                                    ((LongField) field).setPlaceholder("long value");
+                                    field.setValue(Long.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0"));
                                     break;
                             }
                         } else if (parameter.getDefaultCasting().getSimpleName().matches("^Float|Double$")) {
-                            field = new NumberField();
-
                             switch (parameter.getDefaultCasting().getSimpleName()) {
                                 case "Float":
-                                    ((NumberField) field).setMin(Double.valueOf(String.valueOf(Float.MIN_VALUE)));
-                                    ((NumberField) field).setMax(Float.MAX_VALUE);
-                                    ((NumberField) field).setPlaceholder("float value");
+                                    field = new FloatField();
+                                    ((FloatField) field).setStep((float) 0.1);
+                                    ((FloatField) field).setMin(Float.MIN_VALUE);
+                                    ((FloatField) field).setMax(Float.MAX_VALUE);
+                                    ((FloatField) field).setPlaceholder("float value");
+                                    field.setValue(Float.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0.0"));
                                     break;
                                 case "Double":
+                                    field = new NumberField();
+                                    ((NumberField) field).setStep(0.1);
                                     ((NumberField) field).setMin(-Double.MAX_VALUE);
                                     ((NumberField) field).setMax(Double.MAX_VALUE);
                                     ((NumberField) field).setPlaceholder("double value");
+                                    field.setValue(Double.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0.0"));
                                     break;
                             }
                         }
-                        field.setValue(Double.valueOf(Objects.nonNull(parameter.getValue()) ? parameter.getValue() : "0.0"));
                     } else if (Boolean.class.isAssignableFrom(parameter.getDefaultCasting())) {
                         field = new Checkbox();
                         field.setValue(Boolean.valueOf(parameter.getValue()));

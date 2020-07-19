@@ -125,7 +125,7 @@ public class MethodsView extends Div implements HasUrlParameter<String> {
 
         ComboBox<Method> availableMethodsSelect = new ComboBox<>();
         availableMethodsSelect.setPlaceholder("Select method to add...");
-        availableMethodsSelect.setItemLabelGenerator(Method::getName);
+        availableMethodsSelect.setItemLabelGenerator(Method::getLabel);
         availableMethodsSelect.setItems(FilterService.find(currentFilter.getFilterClass()).get().getMethods());
         availableMethodsSelect.setClearButtonVisible(true);
 
