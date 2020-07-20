@@ -18,7 +18,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping(value = "/filters", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+@RequestMapping(value = "/api/filters", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
 public class FilterController {
 
     private final FilterResourceAssembler filterResourceAssembler;

@@ -19,7 +19,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 @Slf4j
-@RequestMapping(path = "/pipelines", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+@RequestMapping(path = "/api/pipelines", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE, "application/hal+json"})
 public class PipelineController {
 
     private final PipelineService pipelineService;

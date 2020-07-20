@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@RequestMapping(path = "/vtk")
+@RequestMapping(path = "/api/vtk")
 public class VtkController {
 
     private final VtkService vtkService;

@@ -1,6 +1,8 @@
 package com.example.vtkdemo.controller;
 
 import com.example.vtkdemo.entity.PipelineEntity;
+import org.springframework.data.rest.webmvc.ProfileResourceProcessor;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Component;
@@ -14,7 +16,8 @@ public class PipelineResourceAssembler implements ResourceAssembler<PipelineEnti
     public Resource<PipelineEntity> toResource(PipelineEntity pipelineEntity) {
         return new Resource<>(pipelineEntity,
                 linkTo(methodOn(PipelineController.class).findById(pipelineEntity.getId())).withSelfRel(),
-                linkTo(methodOn(PipelineController.class).findAll()).withRel("pipelines")
+                linkTo(methodOn(PipelineController.class).findAll()).withRel("pipelines"),
+                new Link("http://localhost:8080/profile/pipelineEntities", ProfileResourceProcessor.PROFILE_REL)
         );
     }
 }

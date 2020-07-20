@@ -15,7 +15,6 @@ import static springfox.documentation.builders.PathSelectors.regex;
 
 @Configuration
 @EnableSwagger2
-@EnableWebMvc
 public class SwaggerConfig implements WebMvcConfigurer {
     @Bean
     public Docket api() {
@@ -24,21 +23,21 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .apis(RequestHandlerSelectors.basePackage("com.example.vtkdemo.controller"))
                 .paths(
                         or(
-                                regex("/filters.*"),
+                                regex("/api/filters.*"),
                                 or(
-                                        regex("/pipelines.*"),
-                                        regex("/vtk.*")
+                                        regex("/api/pipelines.*"),
+                                        regex("/api/vtk.*")
                                 )
                         )
                 )
                 .build();
     }
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html")
-                .addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/");
-    }
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("swagger-ui.html")
+//                .addResourceLocations("classpath:/META-INF/resources/");
+//        registry.addResourceHandler("/webjars/**")
+//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+//    }
 }
