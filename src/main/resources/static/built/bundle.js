@@ -52523,7 +52523,7 @@ var follow = __webpack_require__(/*! ./follow */ "./src/main/js/follow.js"); // 
 // end::vars[]
 
 
-var rootPipelines = '/pipelineEntities'; // tag::app[]
+var root = '/api'; // tag::app[]
 
 var App = /*#__PURE__*/function (_React$Component) {
   _inherits(App, _React$Component);
@@ -52537,21 +52537,31 @@ var App = /*#__PURE__*/function (_React$Component) {
 
     _this = _super.call(this, props);
     _this.state = {
-      pipelines: []
+      pipelines: [],
+      attributes: [],
+      pageSize: 5,
+      links: {}
     };
+    _this.updatePageSize = _this.updatePageSize.bind(_assertThisInitialized(_this));
+    _this.onCreate = _this.onCreate.bind(_assertThisInitialized(_this));
+    _this.onDelete = _this.onDelete.bind(_assertThisInitialized(_this));
+    _this.onNavigate = _this.onNavigate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(App, [{
     key: "loadFromServer",
-    value: function loadFromServer() {
+    value: function loadFromServer(pageSize) {
       var _this2 = this;
 
       var _schema;
 
-      follow(client, rootPipelines, [{
-        rel: 'pipelineEntities'
-      }], false).then(function (pipelineCollection) {
+      follow(client, root, [{
+        rel: 'pipelines',
+        params: {
+          size: pageSize
+        }
+      }]).then(function (pipelineCollection) {
         return client({
           method: 'GET',
           path: pipelineCollection.entity._links.profile.href,
@@ -52564,23 +52574,109 @@ var App = /*#__PURE__*/function (_React$Component) {
         });
       }).done(function (pipelineCollection) {
         _this2.setState({
-          pipelines: pipelineCollection.entity._embedded.pipelineEntities,
+          pipelines: pipelineCollection.entity._embedded.pipelines,
           attributes: Object.keys(_schema.properties),
+          pageSize: pageSize,
           links: pipelineCollection.entity._links
         });
       });
-    }
+    } // tag::create[]
+
+  }, {
+    key: "onCreate",
+    value: function onCreate(newPipeline) {
+      var _this3 = this;
+
+      follow(client, root, ['pipelines']).then(function (pipelineCollection) {
+        return client({
+          method: 'POST',
+          path: pipelineCollection.entity._links.self.href,
+          entity: newPipeline,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      }).then(function (response) {
+        return follow(client, root, [{
+          rel: 'pipelines',
+          params: {
+            'size': _this3.state.pageSize
+          }
+        }]);
+      }).done(function (response) {
+        if (typeof response.entity._links.last !== "undefined") {
+          _this3.onNavigate(response.entity._links.last.href);
+        } else {
+          _this3.onNavigate(response.entity._links.self.href);
+        }
+      });
+    } // end::create[]
+    // tag::delete[]
+
+  }, {
+    key: "onDelete",
+    value: function onDelete(pipeline) {
+      var _this4 = this;
+
+      client({
+        method: 'DELETE',
+        path: pipeline._links.self.href
+      }).done(function (response) {
+        _this4.loadFromServer(_this4.state.pageSize);
+      });
+    } // end::delete[]
+    // tag::navigate[]
+
+  }, {
+    key: "onNavigate",
+    value: function onNavigate(navUri) {
+      var _this5 = this;
+
+      client({
+        method: 'GET',
+        path: navUri
+      }).done(function (pipelineCollection) {
+        _this5.setState({
+          pipelines: pipelineCollection.entity._embedded.pipelines,
+          attributes: _this5.state.attributes,
+          pageSize: _this5.state.pageSize,
+          links: pipelineCollection.entity._links
+        });
+      });
+    } // end::navigate[]
+    // tag::update-page-size[]
+
+  }, {
+    key: "updatePageSize",
+    value: function updatePageSize(pageSize) {
+      if (pageSize !== this.state.pageSize) {
+        this.loadFromServer(pageSize);
+      }
+    } // end::update-page-size[]
+
   }, {
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.loadFromServer();
+      this.loadFromServer(this.state.pageSize);
     }
   }, {
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement(PipelineList, {
-        pipelines: this.state.pipelines
-      });
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(CreateDialog, {
+        attributes: this.state.attributes,
+        excludes: ['filters'],
+        defaults: {
+          filters: []
+        },
+        onCreate: this.onCreate
+      }), /*#__PURE__*/React.createElement(PipelineList, {
+        pipelines: this.state.pipelines,
+        links: this.state.links,
+        pageSize: this.state.pageSize,
+        onNavigate: this.onNavigate,
+        onDelete: this.onDelete,
+        updatePageSize: this.updatePageSize
+      }));
     }
   }]);
 
@@ -52594,26 +52690,135 @@ var PipelineList = /*#__PURE__*/function (_React$Component2) {
 
   var _super2 = _createSuper(PipelineList);
 
-  function PipelineList() {
+  function PipelineList(props) {
+    var _this6;
+
     _classCallCheck(this, PipelineList);
 
-    return _super2.apply(this, arguments);
-  }
+    _this6 = _super2.call(this, props);
+    _this6.handleNavFirst = _this6.handleNavFirst.bind(_assertThisInitialized(_this6));
+    _this6.handleNavPrev = _this6.handleNavPrev.bind(_assertThisInitialized(_this6));
+    _this6.handleNavNext = _this6.handleNavNext.bind(_assertThisInitialized(_this6));
+    _this6.handleNavLast = _this6.handleNavLast.bind(_assertThisInitialized(_this6));
+    _this6.handleInput = _this6.handleInput.bind(_assertThisInitialized(_this6));
+    return _this6;
+  } // tag::handle-page-size-updates[]
+
 
   _createClass(PipelineList, [{
+    key: "handleInput",
+    value: function handleInput(e) {
+      e.preventDefault();
+      var pageSize = ReactDOM.findDOMNode(this.refs.pageSize).value;
+
+      if (/^[0-9]+$/.test(pageSize)) {
+        this.props.updatePageSize(pageSize);
+      } else {
+        ReactDOM.findDOMNode(this.refs.pageSize).value = pageSize.substring(0, pageSize.length - 1);
+      }
+    } // end::handle-page-size-updates[]
+    // tag::handle-nav[]
+
+  }, {
+    key: "handleNavFirst",
+    value: function handleNavFirst(e) {
+      e.preventDefault();
+      this.props.onNavigate(this.props.links.first.href);
+    }
+  }, {
+    key: "handleNavPrev",
+    value: function handleNavPrev(e) {
+      e.preventDefault();
+      this.props.onNavigate(this.props.links.prev.href);
+    }
+  }, {
+    key: "handleNavNext",
+    value: function handleNavNext(e) {
+      e.preventDefault();
+      this.props.onNavigate(this.props.links.next.href);
+    }
+  }, {
+    key: "handleNavLast",
+    value: function handleNavLast(e) {
+      e.preventDefault();
+      this.props.onNavigate(this.props.links.last.href);
+    } // end::handle-nav[]
+
+  }, {
     key: "render",
     value: function render() {
+      var _this7 = this;
+
       var pipelines = this.props.pipelines.map(function (pipeline) {
         return /*#__PURE__*/React.createElement(Pipeline, {
           key: pipeline._links.self.href,
-          pipeline: pipeline
+          pipeline: pipeline,
+          onDelete: _this7.props.onDelete
         });
       });
-      return /*#__PURE__*/React.createElement("table", {
-        className: "table"
+      var navLinks = [];
+
+      if ("first" in this.props.links) {
+        navLinks.push( /*#__PURE__*/React.createElement("li", {
+          className: "page-item",
+          key: "li-first"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          key: "first",
+          onClick: this.handleNavFirst,
+          href: "#"
+        }, "First")));
+      }
+
+      if ("prev" in this.props.links) {
+        navLinks.push( /*#__PURE__*/React.createElement("li", {
+          className: "page-item",
+          key: "li-prev"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          key: "prev",
+          onClick: this.handleNavPrev,
+          href: "#"
+        }, "Prev")));
+      }
+
+      if ("next" in this.props.links) {
+        navLinks.push( /*#__PURE__*/React.createElement("li", {
+          className: "page-item",
+          key: "li-next"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          key: "next",
+          onClick: this.handleNavNext,
+          href: "#"
+        }, "Next")));
+      }
+
+      if ("last" in this.props.links) {
+        navLinks.push( /*#__PURE__*/React.createElement("li", {
+          className: "page-item",
+          key: "li-last"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          key: "last",
+          onClick: this.handleNavLast,
+          href: "#"
+        }, "Last")));
+      }
+
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+        ref: "pageSize",
+        defaultValue: this.props.pageSize,
+        onInput: this.handleInput
+      }), /*#__PURE__*/React.createElement("table", {
+        className: "table table-striped table-hover table-bordered"
       }, /*#__PURE__*/React.createElement("thead", {
         className: "thead-light"
-      }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Name"))), /*#__PURE__*/React.createElement("tbody", null, pipelines));
+      }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Name"), /*#__PURE__*/React.createElement("th", null, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, pipelines)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("nav", {
+        "aria-label": "Page navigation example"
+      }, /*#__PURE__*/React.createElement("ul", {
+        className: "pagination"
+      }, navLinks))));
     }
   }]);
 
@@ -52627,21 +52832,107 @@ var Pipeline = /*#__PURE__*/function (_React$Component3) {
 
   var _super3 = _createSuper(Pipeline);
 
-  function Pipeline() {
+  function Pipeline(props) {
+    var _this8;
+
     _classCallCheck(this, Pipeline);
 
-    return _super3.apply(this, arguments);
+    _this8 = _super3.call(this, props);
+    _this8.handleDelete = _this8.handleDelete.bind(_assertThisInitialized(_this8));
+    return _this8;
   }
 
   _createClass(Pipeline, [{
+    key: "handleDelete",
+    value: function handleDelete() {
+      this.props.onDelete(this.props.pipeline);
+    }
+  }, {
     key: "render",
     value: function render() {
-      return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, this.props.pipeline.name));
+      return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, this.props.pipeline.name), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("button", {
+        onClick: this.handleDelete
+      }, "Delete")));
     }
   }]);
 
   return Pipeline;
 }(React.Component); // end::pipeline[]
+// tag::create-dialog[]
+
+
+var CreateDialog = /*#__PURE__*/function (_React$Component4) {
+  _inherits(CreateDialog, _React$Component4);
+
+  var _super4 = _createSuper(CreateDialog);
+
+  function CreateDialog(props) {
+    var _this9;
+
+    _classCallCheck(this, CreateDialog);
+
+    _this9 = _super4.call(this, props);
+    _this9.handleSubmit = _this9.handleSubmit.bind(_assertThisInitialized(_this9));
+    return _this9;
+  }
+
+  _createClass(CreateDialog, [{
+    key: "handleSubmit",
+    value: function handleSubmit(e) {
+      var _this10 = this;
+
+      e.preventDefault();
+      var newPipeline = {};
+      this.props.excludes.forEach(function (exclude) {
+        _this10.props.defaults[exclude] ? newPipeline[exclude] = _this10.props.defaults[exclude] : undefined;
+      });
+      this.props.attributes.filter(function (attribute) {
+        return !_this10.props.excludes.includes(attribute);
+      }).forEach(function (attribute) {
+        newPipeline[attribute] = ReactDOM.findDOMNode(_this10.refs[attribute]).value.trim();
+      });
+      this.props.onCreate(newPipeline); // clear out the dialog's inputs
+
+      this.props.attributes.forEach(function (attribute) {
+        ReactDOM.findDOMNode(_this10.refs[attribute]).value = '';
+      }); // Navigate away from the dialog to hide it.
+
+      window.location = "#";
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this11 = this;
+
+      var inputs = this.props.attributes.filter(function (attribute) {
+        return !_this11.props.excludes.includes(attribute);
+      }).map(function (attribute) {
+        return /*#__PURE__*/React.createElement("p", {
+          key: attribute
+        }, /*#__PURE__*/React.createElement("input", {
+          type: "text",
+          placeholder: attribute,
+          ref: attribute,
+          className: "field"
+        }));
+      });
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("a", {
+        href: "#createPipeline"
+      }, "Create"), /*#__PURE__*/React.createElement("div", {
+        id: "createPipeline",
+        className: "modalDialog"
+      }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("a", {
+        href: "#",
+        title: "Close",
+        className: "close"
+      }, "X"), /*#__PURE__*/React.createElement("h2", null, "Create new pipeline"), /*#__PURE__*/React.createElement("form", null, inputs, /*#__PURE__*/React.createElement("button", {
+        onClick: this.handleSubmit
+      }, "Create")))));
+    }
+  }]);
+
+  return CreateDialog;
+}(React.Component); // end::create-dialog[]
 // tag::render[]
 
 
@@ -52691,20 +52982,20 @@ module.exports = rest.wrap(mime, {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = function follow(api, rootPath, relArray, embedded) {
+module.exports = function follow(api, rootPath, relArray) {
   var root = api({
     method: 'GET',
     path: rootPath
   });
   return relArray.reduce(function (root, arrayItem) {
     var rel = typeof arrayItem === 'string' ? arrayItem : arrayItem.rel;
-    return traverseNext(root, rel, arrayItem, embedded);
+    return traverseNext(root, rel, arrayItem);
   }, root);
 
-  function traverseNext(root, rel, arrayItem, embedded) {
+  function traverseNext(root, rel, arrayItem) {
     return root.then(function (response) {
       if (hasEmbeddedRel(response.entity, rel)) {
-        return embedded ? response.entity._embedded[rel] : response;
+        return response.entity._embedded[rel];
       }
 
       if (!response.entity._links) {

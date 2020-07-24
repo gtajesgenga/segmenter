@@ -11,8 +11,8 @@ public class HomeController {
         return "ui/index";
     }
 
-    @GetMapping(value = {"/api", "/api/swagger"})
+    @GetMapping(value = {"/"})
     public String swagger() {
-        return "redirect:/swagger-ui.html";
+        return "redirect:/swagger-ui/index.html";
     }
 }

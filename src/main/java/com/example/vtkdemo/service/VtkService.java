@@ -2,7 +2,7 @@ package com.example.vtkdemo.service;
 
 import com.example.vtkdemo.client.OrthancClient;
 import com.example.vtkdemo.config.ApplicationConfig;
-import com.example.vtkdemo.entity.PipelineEntity;
+import com.example.vtkdemo.entity.Pipeline;
 import com.example.vtkdemo.model.FilterDto;
 import com.example.vtkdemo.model.Method;
 import com.example.vtkdemo.model.Parameter;
@@ -66,7 +66,7 @@ public class VtkService {
         log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
         log.info("Instances {}", Arrays.toString(instances.toArray()));
 
-        Optional<PipelineEntity> pipeline = pipelineRepository.findById(pipelineId);
+        Optional<Pipeline> pipeline = pipelineRepository.findById(pipelineId);
 
         if (pipeline.isPresent()) {
             Path path = null;
@@ -100,7 +100,7 @@ public class VtkService {
 
             //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
-            for (FilterDto filter : pipeline.get().getPipelineDto().getFilters()) {
+            for (FilterDto filter : pipeline.get().getFilters()) {
                 processFilter(filter);
             }
 

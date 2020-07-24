@@ -1,11 +1,9 @@
 package com.example.vtkdemo;
 
-import com.example.vtkdemo.controller.PipelineController;
 import com.example.vtkdemo.controller.VtkController;
-import com.example.vtkdemo.entity.PipelineEntity;
+import com.example.vtkdemo.entity.Pipeline;
 import com.example.vtkdemo.model.FilterDto;
-import com.example.vtkdemo.model.PipelineDto;
-import com.example.vtkdemo.model.PipelineRequest;
+import com.example.vtkdemo.repository.PipelineRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -16,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -38,7 +35,7 @@ public class PipelineDtoEntityControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    PipelineController pipelineController;
+    PipelineRepository repository;
     @Autowired
     VtkController vtkController;
     private Long id;
@@ -54,17 +51,18 @@ public class PipelineDtoEntityControllerTest {
                     .collect(Collectors.joining("\n")), List.class);
         }
 
-        PipelineRequest request = new PipelineRequest("pipeline-test", PipelineDto.builder()
+        Pipeline request = Pipeline.builder()
+                .name("pipeline-test")
                 .filters(filters)
-                .build());
+                .build();
 
-        Resource<PipelineEntity> response = pipelineController.createPipeline(request);
-        id = response.getContent().getId();
+        Pipeline response = repository.save(request);
+        id = response.getId();
     }
 
     @After
     public void setDown() {
-        pipelineController.deletePipeline(id);
+        repository.deleteById(id);
     }
 
     @Test

@@ -2,13 +2,13 @@ package com.example.vtkdemo.controller;
 
 import com.example.vtkdemo.config.ApplicationConfig;
 import com.example.vtkdemo.service.VtkService;
+import com.sun.istack.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;

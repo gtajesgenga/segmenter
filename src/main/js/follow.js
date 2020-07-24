@@ -1,4 +1,4 @@
-module.exports = function follow(api, rootPath, relArray, embedded) {
+module.exports = function follow(api, rootPath, relArray) {
     const root = api({
         method: 'GET',
         path: rootPath
@@ -6,13 +6,13 @@ module.exports = function follow(api, rootPath, relArray, embedded) {
 
     return relArray.reduce(function(root, arrayItem) {
         const rel = typeof arrayItem === 'string' ? arrayItem : arrayItem.rel;
-        return traverseNext(root, rel, arrayItem, embedded);
+        return traverseNext(root, rel, arrayItem);
     }, root);
 
-    function traverseNext (root, rel, arrayItem, embedded) {
+    function traverseNext (root, rel, arrayItem) {
         return root.then(function (response) {
             if (hasEmbeddedRel(response.entity, rel)) {
-                return embedded ? response.entity._embedded[rel] : response;
+                return response.entity._embedded[rel];
             }
 
             if(!response.entity._links) {

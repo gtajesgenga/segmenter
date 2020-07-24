@@ -18,6 +18,10 @@ spring:
             non_contextual_creation: true
     open-in-view: false
 
+  data:
+    rest:
+      base-path: /api
+
 logging:
   level:
     root: INFO

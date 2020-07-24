@@ -1,9 +1,10 @@
 package com.example.vtkdemo.entity;
 
-import com.example.vtkdemo.model.PipelineDto;
+import com.example.vtkdemo.model.FilterDto;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "pipeline")
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PipelineEntity {
+public class Pipeline {
 
     @Id @Column(name = "id") @GeneratedValue
     private Long id;
@@ -22,5 +23,5 @@ public class PipelineEntity {
     @EqualsAndHashCode.Exclude
     @Column(name = "json", columnDefinition = "text", nullable = false)
     @Convert(converter = PipelineConverter.class)
-    private PipelineDto pipelineDto;
+    private List<FilterDto> filters;
 }
