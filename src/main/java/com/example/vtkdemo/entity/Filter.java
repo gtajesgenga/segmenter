@@ -1,16 +1,17 @@
-package com.example.vtkdemo.model;
+package com.example.vtkdemo.entity;
 
-import lombok.*;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder()
 @NoArgsConstructor
 @AllArgsConstructor
-public class FilterDto {
+public class Filter {
 
     @Builder.Default
     private String uuid = UUID.randomUUID().toString();

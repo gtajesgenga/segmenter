@@ -188,7 +188,20 @@ class PipelineList extends React.Component {
 
         return (
             <div>
-                <input ref="pageSize" defaultValue={this.props.pageSize} onInput={this.handleInput}/>
+                <div className="input-group mb-3">
+                    <div className="input-group-prepend">
+                        <label className="input-group-text" htmlFor="pageSelect">Show:</label>
+                    </div>
+                    <select className="col-1 custom-select" id="pageSelect" ref="pageSize" onChange={this.handleInput} value={this.props.pageSize}>
+                        <option value="1">1</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                    </select>
+                    <div className="input-group-append">
+                        <label className="input-group-text" htmlFor="pageSelect">items</label>
+                    </div>
+                </div>
                 <table className="table table-striped table-hover table-bordered">
                     <thead className="thead-light">
                     <tr>
@@ -201,7 +214,7 @@ class PipelineList extends React.Component {
                     </tbody>
                 </table>
                 <div>
-                    <nav aria-label="Page navigation example">
+                    <nav aria-label="Page navigation">
                         <ul className="pagination">
                             {navLinks}
                         </ul>
@@ -230,7 +243,7 @@ class Pipeline extends React.Component{
             <tr>
                 <td>{this.props.pipeline.name}</td>
                 <td>
-                    <button onClick={this.handleDelete}>Delete</button>
+                    <button type="button" className="btn btn-sm btn-danger" onClick={this.handleDelete}>Delete</button>
                 </td>
             </tr>
         )
@@ -275,18 +288,29 @@ class CreateDialog extends React.Component {
 
         return (
             <div>
-                <a href="#createPipeline">Create</a>
+                <a href="#createPipeline" className="float-right btn btn-sm btn-success" data-toggle="modal" data-target="#createPipeline">Create</a>
 
-                <div id="createPipeline" className="modalDialog">
-                    <div>
-                        <a href="#" title="Close" className="close">X</a>
+                <div id="createPipeline" className="modal fade" tabIndex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div>
+                                <div className="modal-header">
+                                    <h2 className="modal-title" id="modalTitle">Create new pipeline</h2>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
 
-                        <h2>Create new pipeline</h2>
-
-                        <form>
-                            {inputs}
-                            <button onClick={this.handleSubmit}>Create</button>
-                        </form>
+                                <div className="modal-body">
+                                    <form>
+                                        {inputs}
+                                    </form>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-primary" onClick={this.handleSubmit}>Create</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

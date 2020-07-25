@@ -1,6 +1,5 @@
 package com.example.vtkdemo.entity;
 
-import com.example.vtkdemo.model.FilterDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -23,5 +22,5 @@ public class Pipeline {
     @EqualsAndHashCode.Exclude
     @Column(name = "json", columnDefinition = "text", nullable = false)
     @Convert(converter = PipelineConverter.class)
-    private List<FilterDto> filters;
+    private List<Filter> filters;
 }

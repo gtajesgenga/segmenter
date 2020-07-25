@@ -1,6 +1,7 @@
 package com.example.vtkdemo.config;
 
 import com.example.vtkdemo.client.LoggingRequestInterceptor;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +30,8 @@ public class ApplicationConfig {
     private void initialize() {
         try {
             File directory = new File(tempFolder);
-            if (! directory.exists()){
-                if (!directory.mkdir()) {
+            if (!directory.exists() && !directory.mkdir()) {
                     log.warn("eventType=error message=Error on creation of temp directory");
-                }
             }
             FileUtils.cleanDirectory(directory);
         } catch (IOException e) {

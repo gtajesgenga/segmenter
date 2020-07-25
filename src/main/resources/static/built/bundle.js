@@ -52806,16 +52806,38 @@ var PipelineList = /*#__PURE__*/function (_React$Component2) {
         }, "Last")));
       }
 
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+        className: "input-group mb-3"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "input-group-prepend"
+      }, /*#__PURE__*/React.createElement("label", {
+        className: "input-group-text",
+        htmlFor: "pageSelect"
+      }, "Show:")), /*#__PURE__*/React.createElement("select", {
+        className: "col-1 custom-select",
+        id: "pageSelect",
         ref: "pageSize",
-        defaultValue: this.props.pageSize,
-        onInput: this.handleInput
-      }), /*#__PURE__*/React.createElement("table", {
+        onChange: this.handleInput,
+        value: this.props.pageSize
+      }, /*#__PURE__*/React.createElement("option", {
+        value: "1"
+      }, "1"), /*#__PURE__*/React.createElement("option", {
+        value: "5"
+      }, "5"), /*#__PURE__*/React.createElement("option", {
+        value: "10"
+      }, "10"), /*#__PURE__*/React.createElement("option", {
+        value: "20"
+      }, "20")), /*#__PURE__*/React.createElement("div", {
+        className: "input-group-append"
+      }, /*#__PURE__*/React.createElement("label", {
+        className: "input-group-text",
+        htmlFor: "pageSelect"
+      }, "items"))), /*#__PURE__*/React.createElement("table", {
         className: "table table-striped table-hover table-bordered"
       }, /*#__PURE__*/React.createElement("thead", {
         className: "thead-light"
       }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Name"), /*#__PURE__*/React.createElement("th", null, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, pipelines)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("nav", {
-        "aria-label": "Page navigation example"
+        "aria-label": "Page navigation"
       }, /*#__PURE__*/React.createElement("ul", {
         className: "pagination"
       }, navLinks))));
@@ -52851,6 +52873,8 @@ var Pipeline = /*#__PURE__*/function (_React$Component3) {
     key: "render",
     value: function render() {
       return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, this.props.pipeline.name), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn btn-sm btn-danger",
         onClick: this.handleDelete
       }, "Delete")));
     }
@@ -52917,17 +52941,42 @@ var CreateDialog = /*#__PURE__*/function (_React$Component4) {
         }));
       });
       return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("a", {
-        href: "#createPipeline"
+        href: "#createPipeline",
+        className: "float-right btn btn-sm btn-success",
+        "data-toggle": "modal",
+        "data-target": "#createPipeline"
       }, "Create"), /*#__PURE__*/React.createElement("div", {
         id: "createPipeline",
-        className: "modalDialog"
-      }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("a", {
-        href: "#",
-        title: "Close",
-        className: "close"
-      }, "X"), /*#__PURE__*/React.createElement("h2", null, "Create new pipeline"), /*#__PURE__*/React.createElement("form", null, inputs, /*#__PURE__*/React.createElement("button", {
+        className: "modal fade",
+        tabIndex: "-1",
+        role: "dialog",
+        "aria-labelledby": "modalTitle",
+        "aria-hidden": "true"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-dialog"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-content"
+      }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+        className: "modal-header"
+      }, /*#__PURE__*/React.createElement("h2", {
+        className: "modal-title",
+        id: "modalTitle"
+      }, "Create new pipeline"), /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "close",
+        "data-dismiss": "modal",
+        "aria-label": "Close"
+      }, /*#__PURE__*/React.createElement("span", {
+        "aria-hidden": "true"
+      }, "\xD7"))), /*#__PURE__*/React.createElement("div", {
+        className: "modal-body"
+      }, /*#__PURE__*/React.createElement("form", null, inputs)), /*#__PURE__*/React.createElement("div", {
+        className: "modal-footer"
+      }, /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn btn-primary",
         onClick: this.handleSubmit
-      }, "Create")))));
+      }, "Create")))))));
     }
   }]);
 

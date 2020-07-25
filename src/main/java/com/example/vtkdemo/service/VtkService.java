@@ -3,9 +3,9 @@ package com.example.vtkdemo.service;
 import com.example.vtkdemo.client.OrthancClient;
 import com.example.vtkdemo.config.ApplicationConfig;
 import com.example.vtkdemo.entity.Pipeline;
-import com.example.vtkdemo.model.FilterDto;
-import com.example.vtkdemo.model.Method;
-import com.example.vtkdemo.model.Parameter;
+import com.example.vtkdemo.entity.Filter;
+import com.example.vtkdemo.entity.Method;
+import com.example.vtkdemo.entity.Parameter;
 import com.example.vtkdemo.repository.PipelineRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -100,7 +100,7 @@ public class VtkService {
 
             //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
-            for (FilterDto filter : pipeline.get().getFilters()) {
+            for (Filter filter : pipeline.get().getFilters()) {
                 processFilter(filter);
             }
 
@@ -136,7 +136,7 @@ public class VtkService {
         return new byte[0];
     }
 
-    private void processFilter(FilterDto filter) throws InvocationTargetException {
+    private void processFilter(Filter filter) throws InvocationTargetException {
 
         try {
             Object instance = Class.forName(filter.getFilterClass()).getConstructor().newInstance();

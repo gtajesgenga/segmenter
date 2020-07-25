@@ -1,4 +1,4 @@
-package com.example.vtkdemo.model;
+package com.example.vtkdemo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

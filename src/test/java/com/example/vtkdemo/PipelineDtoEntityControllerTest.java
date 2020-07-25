@@ -2,7 +2,7 @@ package com.example.vtkdemo;
 
 import com.example.vtkdemo.controller.VtkController;
 import com.example.vtkdemo.entity.Pipeline;
-import com.example.vtkdemo.model.FilterDto;
+import com.example.vtkdemo.entity.Filter;
 import com.example.vtkdemo.repository.PipelineRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -43,7 +43,7 @@ public class PipelineDtoEntityControllerTest {
     @Before
     public void setUp() throws IOException {
         InputStream inputStream = new ClassPathResource("filters.json").getInputStream();
-        List<FilterDto> filters;
+        List<Filter> filters;
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream)) ) {
