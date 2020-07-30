@@ -7,11 +7,13 @@ import javassist.Modifier;
 import org.apache.commons.lang3.ClassUtils;
 import org.itk.simple.ImageFilter_1;
 import org.reflections.Reflections;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Service
 public class FilterService {
 
     private static Map<String, List<Method>> filtersMap;

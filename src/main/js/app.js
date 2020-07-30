@@ -1,27 +1,79 @@
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../resources/static/main.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as fai from '@fortawesome/free-solid-svg-icons';
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
+import {useState} from "react";
+import FormControl from "react-bootstrap/FormControl";
+import FormLabel from "react-bootstrap/FormLabel";
+import {Container, Nav, Pagination, Row, Table} from "react-bootstrap";
 
 // tag::vars[]
 const React = require('react');
 const ReactDOM = require('react-dom');
-const client = require('./client');
-const follow = require('./follow'); // function to hop multiple links by "rel"
+const client = require('./client/client');
+const when = require('when');
+const follow = require('./client/follow'); // function to hop multiple links by "rel"
 // end::vars[]
 
 const root = '/api';
 
+function MyModal(props) {
+
+    const [show, setShow] = useState(false);
+    const icon = props.btnIcon !== undefined ? <FontAwesomeIcon icon={props.btnIcon} size={"sm"}/> : <></>;
+
+    return (
+        <>
+            <div className={props.customClass}>
+                <Button className={"float-right"} variant={"success"} size={"sm"} onClick={() => setShow(true)}>
+                    {icon}&nbsp;{props.btnLabel}
+                </Button>
+
+                <Modal show={show} onHide={() => setShow(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{props.title}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                            {props.inputs}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant={"primary"} onClick={(e) => { setShow(false); props.callback(e); }}>{props.btnLabel}</Button>
+                    </Modal.Footer>
+                </Modal>
+            </div>
+        </>
+    );
+}
 
 // tag::app[]
 class App extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {pipelines: [], attributes: [], pageSize: 5, links: {}};
+        this.state = {pipelines: [], attributes: [], pageSize: 5, links: {}, showAlert: false, alertVariant: 'success', alertText: ''};
         this.updatePageSize = this.updatePageSize.bind(this);
         this.onCreate = this.onCreate.bind(this);
+        this.onUpdate = this.onUpdate.bind(this);
         this.onDelete = this.onDelete.bind(this);
         this.onNavigate = this.onNavigate.bind(this);
     }
+
+    showAlert() {
+        this.setState({
+            showAlert: true
+        });
+
+        setTimeout(() => {
+            this.setState({
+                showAlert: false
+            })
+        }, 5000)
+    };
 
     loadFromServer(pageSize) {
         var _schema;
@@ -35,14 +87,24 @@ class App extends React.Component {
                 headers: {'Accept': 'application/schema+json'}
             }).then(schema => {
                 _schema = schema.entity;
+                this.links = pipelineCollection.entity._links;
                 return pipelineCollection;
             });
-        }).done(pipelineCollection => {
+        }).then(pipelineCollection => {
+            return pipelineCollection.entity._embedded.pipelines.map(pipeline =>
+                client({
+                    method: 'GET',
+                    path: pipeline._links.self.href
+                })
+            );
+        }).then(pipelinePromises => {
+            return when.all(pipelinePromises);
+        }).done(pipelines => {
             this.setState({
-                pipelines: pipelineCollection.entity._embedded.pipelines,
+                pipelines: pipelines,
                 attributes: Object.keys(_schema.properties),
                 pageSize: pageSize,
-                links: pipelineCollection.entity._links
+                links: this.links
             });
         });
     }
@@ -65,13 +127,52 @@ class App extends React.Component {
             } else {
                 this.onNavigate(response.entity._links.self.href);
             }
+            this.setState({
+                alertVariant: 'success',
+                alertText: 'Pipeline ' + newPipeline.name + ' created!.',
+            });
+            this.showAlert();
+        }, response => {
+            if (response.status.code !== 201) {
+                this.setState({
+                    alertVariant: 'danger',
+                    alertText: 'ERROR: Unable to create ' + newPipeline.name + '.',
+                });
+                this.showAlert();
+            }
         });
     }
     // end::create[]
 
+    // tag::update[]
+    onUpdate(pipeline, updatedPipeline) {
+        const alerts = this.state.alerts;
+        client({
+            method: 'PUT',
+            path: pipeline.entity._links.self.href,
+            entity: updatedPipeline,
+            headers: {
+                'Content-Type': 'application/json',
+                'If-Match': pipeline.headers.Etag
+            }
+        }).done(response => {
+            this.loadFromServer(this.state.pageSize);
+        }, response => {
+            if (response.status.code === 412) {
+                this.setState({
+                    alertVariant: 'danger',
+                    alertText: 'DENIED: Unable to update ' + pipeline.entity._links.self.href + '. Your copy is stale.',
+                });
+                this.showAlert();
+            }
+        });
+        this.setState({alerts: alerts});
+    }
+    // end::update[]
+
     // tag::delete[]
     onDelete(pipeline) {
-        client({method: 'DELETE', path: pipeline._links.self.href}).done(response => {
+        client({method: 'DELETE', path: pipeline.entity._links.self.href}).done(response => {
             this.loadFromServer(this.state.pageSize);
         });
     }
@@ -79,12 +180,23 @@ class App extends React.Component {
 
     // tag::navigate[]
     onNavigate(navUri) {
-        client({method: 'GET', path: navUri}).done(pipelineCollection => {
+        client({method: 'GET', path: navUri}).then(pipelineCollection => {
+            this.links = pipelineCollection.entity._links;
+
+            return pipelineCollection.entity._embedded.pipelines.map(pipeline =>
+                client({
+                    method: 'GET',
+                    path: pipeline._links.self.href
+                })
+            );
+        }).then(pipelinePromises => {
+            return when.all(pipelinePromises);
+        }).done(pipelines => {
             this.setState({
-                pipelines: pipelineCollection.entity._embedded.pipelines,
+                pipelines: pipelines,
                 attributes: this.state.attributes,
                 pageSize: this.state.pageSize,
-                links: pipelineCollection.entity._links
+                links: this.links
             });
         });
     }
@@ -105,11 +217,22 @@ class App extends React.Component {
     render() {
         return (
             <div>
-                <CreateDialog attributes={this.state.attributes} excludes={['filters']} defaults={{filters: []}} onCreate={this.onCreate}/>
+                <Alert show={this.state.showAlert} variant={this.state.alertVariant} onClose={() => this.setState({showAlert: !this.state.showAlert})} dismissible>
+                    <p>
+                        {this.state.alertText}
+                    </p>
+                </Alert>
+                <PipelineCreateDialog attributes={this.state.attributes}
+                              excludes={['filters', 'id']}
+                              defaults={{filters: [], id: undefined}}
+                              onCreate={this.onCreate}/>
                 <PipelineList pipelines={this.state.pipelines}
+                              attributes={this.state.attributes}
+                              excludes={['id', 'filters']}
                               links={this.state.links}
                               pageSize={this.state.pageSize}
                               onNavigate={this.onNavigate}
+                              onUpdate={this.onUpdate}
                               onDelete={this.onDelete}
                               updatePageSize={this.updatePageSize}/>
             </div>
@@ -169,42 +292,48 @@ class PipelineList extends React.Component {
 
     render() {
         const pipelines = this.props.pipelines.map(pipeline =>
-            <Pipeline key={pipeline._links.self.href} pipeline={pipeline} onDelete={this.props.onDelete}/>
+            <Pipeline key={pipeline.entity._links.self.href}
+                      pipeline={pipeline} attributes={this.props.attributes}
+                      excludes={this.props.excludes}
+                      defaults={{filters: pipeline.entity.filters, id: pipeline.entity.id}}
+                      onDelete={this.props.onDelete}
+                      onUpdate={this.props.onUpdate}/>
         );
 
         const navLinks = [];
         if ("first" in this.props.links) {
-            navLinks.push(<li className="page-item" key="li-first"><a className="page-link" key="first" onClick={this.handleNavFirst} href="#">First</a></li>);
+            navLinks.push(<Pagination.First className="page-item" key="li-first" onClick={this.handleNavFirst} href="#" />);
         }
         if ("prev" in this.props.links) {
-            navLinks.push(<li className="page-item" key="li-prev"><a className="page-link" key="prev" onClick={this.handleNavPrev} href="#">Prev</a></li>);
+            navLinks.push(<Pagination.Prev className="page-item" key="li-prev" onClick={this.handleNavPrev} href="#" />);
         }
         if ("next" in this.props.links) {
-            navLinks.push(<li className="page-item" key="li-next"><a className="page-link" key="next" onClick={this.handleNavNext} href="#">Next</a></li>);
+            navLinks.push(<Pagination.Next className="page-item" key="li-next" onClick={this.handleNavNext} href="#" />);
         }
         if ("last" in this.props.links) {
-            navLinks.push(<li className="page-item" key="li-last"><a className="page-link" key="last" onClick={this.handleNavLast} href="#">Last</a></li>);
+            navLinks.push(<Pagination.Last className="page-item" key="li-last" onClick={this.handleNavLast} href="#" />);
         }
 
         return (
-            <div>
-                <div className="input-group mb-3">
+            <Container>
+                <div className="mb-3 d-flex">
                     <div className="input-group-prepend">
-                        <label className="input-group-text" htmlFor="pageSelect">Show:</label>
+                        <FormLabel className="input-group-text" htmlFor="pageSelect" column={false}>Show:</FormLabel>
                     </div>
-                    <select className="col-1 custom-select" id="pageSelect" ref="pageSize" onChange={this.handleInput} value={this.props.pageSize}>
+                    <FormControl as={"select"} className="col-1 custom-select" id="pageSelect" ref="pageSize" onChange={this.handleInput} value={this.props.pageSize}>
                         <option value="1">1</option>
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="20">20</option>
-                    </select>
+                    </FormControl>
                     <div className="input-group-append">
-                        <label className="input-group-text" htmlFor="pageSelect">items</label>
+                        <FormLabel column={false} className="input-group-text" htmlFor="pageSelect">items</FormLabel>
                     </div>
                 </div>
-                <table className="table table-striped table-hover table-bordered">
+                <Table striped bordered hover>
                     <thead className="thead-light">
                     <tr>
+                        <th>Id</th>
                         <th>Name</th>
                         <th>Actions</th>
                     </tr>
@@ -212,15 +341,15 @@ class PipelineList extends React.Component {
                     <tbody>
                         {pipelines}
                     </tbody>
-                </table>
-                <div>
-                    <nav aria-label="Page navigation">
-                        <ul className="pagination">
+                </Table>
+                <Container>
+                    <Nav aria-label="Page navigation">
+                        <Pagination className="pagination">
                             {navLinks}
-                        </ul>
-                    </nav>
-                </div>
-            </div>
+                        </Pagination>
+                    </Nav>
+                </Container>
+            </Container>
         )
     }
 }
@@ -241,9 +370,16 @@ class Pipeline extends React.Component{
     render() {
         return (
             <tr>
-                <td>{this.props.pipeline.name}</td>
+                <td>{this.props.pipeline.entity.id}</td>
+                <td>{this.props.pipeline.entity.name}</td>
                 <td>
-                    <button type="button" className="btn btn-sm btn-danger" onClick={this.handleDelete}>Delete</button>
+                    <PipelineUpdateDialog pipeline={this.props.pipeline}
+                                  attributes={this.props.attributes}
+                                  excludes={this.props.excludes}
+                                  defaults={this.props.defaults}
+                                  onUpdate={this.props.onUpdate}/>
+
+                    <Button variant={"danger"} size={"sm"} onClick={this.handleDelete}><FontAwesomeIcon icon={fai.faTrash} size={"sm"}/>&nbsp;Delete</Button>
                 </td>
             </tr>
         )
@@ -251,8 +387,8 @@ class Pipeline extends React.Component{
 }
 // end::pipeline[]
 
-// tag::create-dialog[]
-class CreateDialog extends React.Component {
+// tag::pipeline-create-dialog[]
+class PipelineCreateDialog extends React.Component {
 
     constructor(props) {
         super(props);
@@ -271,7 +407,7 @@ class CreateDialog extends React.Component {
         this.props.onCreate(newPipeline);
 
         // clear out the dialog's inputs
-        this.props.attributes.forEach(attribute => {
+        this.props.attributes.filter(attribute => !this.props.excludes.includes(attribute)).forEach(attribute => {
             ReactDOM.findDOMNode(this.refs[attribute]).value = '';
         });
 
@@ -279,46 +415,60 @@ class CreateDialog extends React.Component {
         window.location = "#";
     }
 
+
+
     render() {
         const inputs = this.props.attributes.filter(attribute => !this.props.excludes.includes(attribute)).map(attribute =>
-            <p key={attribute}>
-                <input type="text" placeholder={attribute} ref={attribute} className="field"/>
-            </p>
+            <Form key={attribute}>
+                <FormLabel column={false}>{attribute}</FormLabel>
+                <FormControl type={"text"} placeholder={attribute} ref={attribute} />
+            </Form>
         );
 
         return (
-            <div>
-                <a href="#createPipeline" className="float-right btn btn-sm btn-success" data-toggle="modal" data-target="#createPipeline">Create</a>
-
-                <div id="createPipeline" className="modal fade" tabIndex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div>
-                                <div className="modal-header">
-                                    <h2 className="modal-title" id="modalTitle">Create new pipeline</h2>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-
-                                <div className="modal-body">
-                                    <form>
-                                        {inputs}
-                                    </form>
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-primary" onClick={this.handleSubmit}>Create</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <MyModal inputs={inputs} customClass={"pr-3"} callback={this.handleSubmit} title={'Create new pipeline'} btnLabel={'Create'} btnIcon={fai.faPlus}/>
         )
     }
 
 }
-// end::create-dialog[]
+// end::pipeline-create-dialog[]
+
+// tag::pipeline-update-dialog[]
+class PipelineUpdateDialog extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        const updatedPipeline = {};
+        this.props.excludes.forEach(exclude => {
+            this.props.defaults[exclude] ? updatedPipeline[exclude] = this.props.defaults[exclude] : undefined;
+        });
+        this.props.attributes.filter(attribute => !this.props.excludes.includes(attribute)).forEach(attribute => {
+            updatedPipeline[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim();
+        });
+        this.props.onUpdate(this.props.pipeline, updatedPipeline);
+        window.location = "#";
+    }
+
+    render() {
+        const inputs = this.props.attributes.filter(attribute => !this.props.excludes.includes(attribute)).map(attribute =>
+            <Form key={attribute}>
+                <FormLabel column={false}>{attribute}</FormLabel>
+                <FormControl type={"text"} placeholder={attribute} defaultValue={this.props.pipeline.entity[attribute]} ref={attribute} />
+            </Form>
+        );
+
+        return(
+            <MyModal customClass={'mr-1 float-left'} inputs={inputs} callback={this.handleSubmit} title={'Update pipeline'} btnLabel={'Update'} btnIcon={fai.faEdit}/>
+        )
+    }
+
+}
+// end::pipeline-update-dialog[]
 
 // tag::render[]
 ReactDOM.render(

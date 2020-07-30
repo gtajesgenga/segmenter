@@ -1,0 +1,10 @@
+.alert {
+    display: inline-block;
+    position: absolute;
+    bottom: 0rem;
+    right: 1rem;
+}
+
+.alert p {
+    margin-bottom: auto;
+}

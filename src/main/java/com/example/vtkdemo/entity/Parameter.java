@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ClassUtils;
 
 @Data
 @Slf4j
@@ -43,7 +44,15 @@ public class Parameter {
         try {
             this.defaultCasting = Class.forName(this.casting);
         } catch (ClassNotFoundException e) {
-            log.error("Casting class doesn't exists.", e);
+            try {
+                int lastIndex = this.casting.lastIndexOf('.');
+                String prefix = this.casting.substring(0, lastIndex);
+                String suffix = this.casting.substring(lastIndex + 1);
+                String clazz = prefix + "$" + suffix;
+                this.defaultCasting = Class.forName(clazz);
+            } catch (ClassNotFoundException ex) {
+                log.error("Casting class doesn't exists.", e);
+            }
         }
     }
 

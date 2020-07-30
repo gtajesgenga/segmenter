@@ -1,5 +1,5 @@
 #NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
-#Sun Feb 23 16:35:41 ART 2020
+#Sun Jul 26 07:21:46 ART 2020
 vtk-8.2-SNAPSHOT-natives-Linux-x86_64.jar>=
 vtk-8.2-SNAPSHOT.pom>=
 vtk-8.2-SNAPSHOT.jar>=

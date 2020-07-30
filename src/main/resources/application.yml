@@ -22,6 +22,9 @@ spring:
     rest:
       base-path: /api
 
+  thymeleaf:
+    cache: false
+
 logging:
   level:
     root: INFO
