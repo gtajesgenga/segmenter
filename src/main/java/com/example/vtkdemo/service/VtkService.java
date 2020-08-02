@@ -30,20 +30,20 @@ import java.util.stream.Stream;
 @Slf4j
 public class VtkService {
 
-    static
-    {
-        if (!vtkNativeLibrary.LoadAllNativeLibraries())
-        {
-            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
-            {
-                if (!lib.IsLoaded())
-                {
-                    System.out.println(lib.GetLibraryName() + " not loaded");
-                }
-            }
-        }
-        vtkNativeLibrary.DisableOutputWindow(null);
-    }
+//    static
+//    {
+//        if (!vtkNativeLibrary.LoadAllNativeLibraries())
+//        {
+//            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
+//            {
+//                if (!lib.IsLoaded())
+//                {
+//                    System.out.println(lib.GetLibraryName() + " not loaded");
+//                }
+//            }
+//        }
+//        vtkNativeLibrary.DisableOutputWindow(null);
+//    }
 
     private final Stack<Image> images = new Stack<>();
 

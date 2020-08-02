@@ -13,7 +13,7 @@ public class FilterResourceAssembler implements RepresentationModelAssembler<Fil
 
     @Override
     public EntityModel<Filter> toModel(Filter filter) {
-        String name = filter.getFilterClass().substring(filter.getFilterClass().lastIndexOf('.')+1);
+        String name = filter.getFilterClass().substring(filter.getFilterClass().lastIndexOf('.') + 1);
         return EntityModel.of(filter,
                 linkTo(methodOn(FilterController.class).findByName(name)).withSelfRel(),
                 linkTo(methodOn(FilterController.class).findAll()).withRel("filters"));
