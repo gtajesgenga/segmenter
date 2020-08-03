@@ -15,6 +15,7 @@ export class FiltersView extends React.Component{
         super(props);
         this.state = { pipelines: [], selectedPipeline: undefined, selectedId: this.props.selectedId};
         this.handleChange = this.handleChange.bind(this);
+        this.onUpdate = this.onUpdate.bind(this);
         this.selectPipeline = this.selectPipeline.bind(this);
     }
 
@@ -41,6 +42,25 @@ export class FiltersView extends React.Component{
 
     componentDidMount() {
         this.loadFromServer();
+    }
+
+    onUpdate(pipeline) {
+        client({
+            method: 'PUT',
+            path: pipeline.entity._links.self.href,
+            entity: pipeline.entity,
+            headers: {
+                'Content-Type': 'application/json',
+                'If-Match': pipeline.headers.Etag
+            }
+        }).done(() => {
+            this.loadFromServer();
+            this.props.showAlert('Filters', 'success', 'pipeline ' + pipeline.entity.id + ' was updated.');
+        }, response => {
+            if (response.status.code === 412) {
+                this.props.showAlert('Filters', 'danger', 'DENIED: Unable to update ' + pipeline.entity.id + '. Your copy is stale.');
+            }
+        });
     }
 
     handleChange(e) {
@@ -70,7 +90,7 @@ export class FiltersView extends React.Component{
                         {pipelines}
                     </Form.Control>
                 </Form>
-                <FilterList selectedPipeline={this.state.selectedPipeline}/>
+                <FilterList selectedPipeline={this.state.selectedPipeline} onUpdate={this.onUpdate}/>
             </div>
         );
     }

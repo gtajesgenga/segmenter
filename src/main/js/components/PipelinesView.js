@@ -33,14 +33,14 @@ export class PipelinesView extends React.Component{
                 { rel: 'pipelines', params: { size: this.state.pageSize } }])
         }).done(response => {
             if (typeof response.entity._links.last !== 'undefined') {
-                this.onNavigate(response.entity._links.last.href)
+                this.onNavigate(response.entity._links.last.href);
             } else {
-                this.onNavigate(response.entity._links.self.href)
+                this.onNavigate(response.entity._links.self.href);
             }
-            this.showAlert('success', 'Pipeline ' + newPipeline.name + ' created!.');
+            this.props.showAlert('Pipelines', 'success', 'Pipeline ' + newPipeline.name + ' created!.');
         }, response => {
             if (response.status.code !== 201) {
-                this.showAlert('danger', 'ERROR: Unable to create ' + newPipeline.name + '.');
+                this.props.showAlert('Pipelines', 'danger', 'ERROR: Unable to create ' + newPipeline.name + '.');
             }
         })
     }
@@ -58,10 +58,10 @@ export class PipelinesView extends React.Component{
             }
         }).done(() => {
             this.loadFromServer(this.state.pageSize)
-            this.props.showAlert('success', 'pipeline ' + pipeline.entity.id + ' was updated.');
+            this.props.showAlert('Pipelines', 'success', 'pipeline ' + pipeline.entity.id + ' was updated.');
         }, response => {
             if (response.status.code === 412) {
-                this.props.showAlert('danger', 'DENIED: Unable to update ' + pipeline.entity.id + '. Your copy is stale.');
+                this.props.showAlert('Pipelines', 'danger', 'DENIED: Unable to update ' + pipeline.entity.id + '. Your copy is stale.');
             }
         });
     }
@@ -70,11 +70,11 @@ export class PipelinesView extends React.Component{
     // tag::delete[]
     onDelete (pipeline) {
         client({ method: 'DELETE', path: pipeline.entity._links.self.href }).done(() => {
-            this.loadFromServer(this.state.pageSize)
-            this.props.showAlert('success', 'pipeline ' + pipeline.entity.id + ' was removed.');
+            this.loadFromServer(this.state.pageSize);
+            this.props.showAlert('Pipelines', 'success', 'pipeline ' + pipeline.entity.id + ' was removed.');
         }, response => {
             if (response.status.code !== 200) {
-                this.props.showAlert('danger', 'ERROR: Unable to delete ' + pipeline.entity.id + '.');
+                this.props.showAlert('Pipelines', 'danger', 'ERROR: Unable to delete ' + pipeline.entity.id + '.');
             }
         });
     }

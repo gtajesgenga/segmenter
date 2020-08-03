@@ -3,6 +3,7 @@ import {Container, Table, Button} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import * as fai from "@fortawesome/free-solid-svg-icons";
 import {Filter} from "./Filter";
+import 'array.prototype.move';
 
 export class FilterList extends React.Component{
 
@@ -11,8 +12,22 @@ export class FilterList extends React.Component{
         this.handleOrder = this.handleOrder.bind(this);
     }
 
-    handleOrder(filter, direction) {
+    handleOrder(e, filter, direction) {
+        e.preventDefault();
+        let idx = this.props.selectedPipeline.entity.filters.findIndex((f) => f.uuid === filter);
 
+        if (idx > -1) {
+            let moved = false;
+
+            if ((direction > 0 && idx < this.props.selectedPipeline.entity.filters.length - 1) || (direction < 0 && idx > 0)) {
+                this.props.selectedPipeline.entity.filters.move(idx, idx + direction);
+                moved = true;
+            }
+
+            if (moved) {
+                this.props.onUpdate(this.props.selectedPipeline);
+            }
+        }
     }
 
     render() {
@@ -20,23 +35,23 @@ export class FilterList extends React.Component{
             let orderActions = <></>;
             switch (index) {
                 case 0:
-                    orderActions = <Button variant={"outline-primary"} className={"border-0"} size={'sm'} onClick={this.handleOrder(filter.uuid, 1)}><FontAwesomeIcon icon={fai.faSortDown} className={"align-text-top"} /></Button>;
+                    orderActions = <Button variant={"outline-primary"} className={"border-0"} size={'sm'} onClick={(e) => this.handleOrder(e, filter.uuid, 1)}><FontAwesomeIcon icon={fai.faSortDown} className={"align-text-top"}/></Button>;
                     break;
                 case (this.props.selectedPipeline.entity.filters.length - 1) :
-                    orderActions = <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={this.handleOrder(filter.uuid, -1)}><FontAwesomeIcon icon={fai.faSortUp} className={"align-text-bottom"} /></Button>;
+                    orderActions = <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, -1)}><FontAwesomeIcon icon={fai.faSortUp} className={"align-text-bottom"}/></Button>;
                     break;
                 default:
                     orderActions =
                         <>
-                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={this.handleOrder(filter.uuid, 1)}><FontAwesomeIcon icon={fai.faSortDown} className={"align-text-top"}/></Button>
+                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, 1)}><FontAwesomeIcon icon={fai.faSortDown} className={"align-text-top"}/></Button>
                             <>&nbsp;</>
-                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={this.handleOrder(filter.uuid, -1)}><FontAwesomeIcon icon={fai.faSortUp} className={"align-text-bottom"}/></Button>
+                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, -1)}><FontAwesomeIcon icon={fai.faSortUp} className={"align-text-bottom"}/></Button>
                         </>;
                     break;
             }
 
             return (
-                <Filter key={filter.uuid} order={index} filter={filter} orderActions={orderActions}/>
+                <Filter key={filter.uuid} pipeline={this.props.selectedPipeline} order={index} filter={filter} orderActions={orderActions}/>
             );
         }) : undefined;
 

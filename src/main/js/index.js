@@ -14,11 +14,18 @@ import {render} from 'react-dom';
 import {PipelinesView} from "./components/PipelinesView";
 import {Root} from "./components/Root";
 import {FiltersView} from "./components/FiltersView";
+import {MethodsView} from "./components/MethodsView";
 
-const ParameterizedFiltersView =() => {
+const ParameterizedFiltersView = (props) => {
     let { id } = useParams();
 
-    return <FiltersView selectedId={id} />;
+    return <FiltersView selectedId={id} showAlert={props.showAlert} />;
+};
+
+const ParameterizedMethodsView = (props) => {
+    let { id, uuid } = useParams();
+
+    return <MethodsView selectedPipelineId={id} selectedFilterUuid={uuid} showAlert={props.showAlert} />;
 };
 
 class App extends React.Component {
@@ -30,7 +37,7 @@ class App extends React.Component {
                     <Route exact path={"/"}>
                         <Redirect from={"/"} to={"/pipelines"}/>
                     </Route>
-                    <Route path={"/pipelines"}>
+                    <Route exact path={"/pipelines"}>
                         <Root>
                             <PipelinesView />
                         </Root>
@@ -40,9 +47,14 @@ class App extends React.Component {
                             <FiltersView />
                         </Root>
                     </Route>
-                    <Route exact path={"/filters/:id"}>
+                    <Route exact path={"/pipelines/:id/filters"}>
                         <Root>
                             <ParameterizedFiltersView/>
+                        </Root>
+                    </Route>
+                    <Route exact path={"/pipelines/:id/filters/:uuid/methods"}>
+                        <Root>
+                            <ParameterizedMethodsView/>
                         </Root>
                     </Route>
                 </Switch>

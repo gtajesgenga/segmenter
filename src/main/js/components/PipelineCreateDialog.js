@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {Form} from "react-bootstrap";
 import * as fai from "@fortawesome/free-solid-svg-icons";
-import {MyModal} from "../utils/Utils";
+import {CustomModal} from "../utils/Utils";
 
 export class PipelineCreateDialog extends React.Component {
     constructor (props) {
@@ -29,9 +29,6 @@ export class PipelineCreateDialog extends React.Component {
         this.props.attributes.filter(attribute => !this.props.excludes.includes(attribute)).forEach(attribute => {
             ReactDOM.findDOMNode(this.refs[attribute]).value = ''
         });
-
-        // Navigate away from the dialog to hide it.
-        window.location = '#'
     }
 
     render () {
@@ -43,7 +40,7 @@ export class PipelineCreateDialog extends React.Component {
         );
 
         return (
-            <MyModal inputs={inputs} customClass={'pr-3'} callback={this.handleSubmit} title={'Create new pipeline'} btnLabel={'Create'} btnIcon={fai.faPlus}/>
+            <CustomModal inputs={inputs} customClass={'pr-3'} callback={this.handleSubmit} title={'Create new pipeline'} btnLabel={'Create'} accpetBtnLabel={'Create'} btnIcon={fai.faPlus}/>
         )
     }
 }

@@ -31,7 +31,7 @@ export class Pipeline extends React.Component {
 
                     <Button variant={'danger'} size={'sm'} onClick={this.handleDelete}><FontAwesomeIcon icon={fai.faTrash} size={'sm'}/>&nbsp;Delete</Button>
                     <div className={"ml-1 d-inline-block"}>
-                        <Button variant={'primary'} size={"sm"} href={"/ui#/filters/" + this.props.pipeline.entity.id}><FontAwesomeIcon
+                        <Button variant={'primary'} size={"sm"} href={"/ui#/pipelines/" + this.props.pipeline.entity.id + "/filters"}><FontAwesomeIcon
                         icon={fai.faFilter}
                         size={"sm"}/>&nbsp;Filters</Button>
                     </div>

@@ -38,7 +38,7 @@ public class FilterService {
 
     public static Optional<Filter> find(String className) {
         return filtersMap.entrySet().stream()
-                .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') +1 ).equals(className))
+                .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') + 1).equals(className))
                 .map(filter -> Filter.builder()
                         .filterClass(filter.getKey())
                         .methods(filter.getValue())

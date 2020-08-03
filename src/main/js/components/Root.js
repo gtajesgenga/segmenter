@@ -1,28 +1,23 @@
 import React from "react";
 import {Container, Row} from "react-bootstrap";
 import {Header} from "./Header";
-import Alert from "react-bootstrap/Alert";
+import Toast from "react-bootstrap/Toast";
 
 export class Root extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { showAlert: false, alertVariant: 'success', alertText: '' };
+        this.state = { showAlert: false, alertVariant: 'd4edda', alertText: '', alertTrigger: '' };
         this.showAlert = this.showAlert.bind(this);
     }
 
-    showAlert(variant, text) {
+    showAlert(trigger, variant, text) {
         this.setState({
+            alertTrigger: trigger,
             alertVariant: variant,
             alertText: text,
             showAlert: true
         });
-
-        setTimeout(() => {
-            this.setState({
-                showAlert: false
-            })
-        }, 5000)
     }
 
     render() {
@@ -42,11 +37,17 @@ export class Root extends React.Component {
                         {children}
                     </div>
                 </Row>
-                <Alert show={this.state.showAlert} variant={this.state.alertVariant} onClose={() => this.setState({ showAlert: !this.state.showAlert })} dismissible>
-                    <p>
-                        {this.state.alertText}
-                    </p>
-                </Alert>
+                <Toast className={"bg-" + this.state.alertVariant} show={this.state.showAlert} onClose={() => this.setState({ showAlert: !this.state.showAlert})} delay={5000} autohide>
+                    <Toast.Header>
+                        <strong className="mr-auto">{this.state.alertTrigger}</strong>
+                    </Toast.Header>
+                    <Toast.Body>{this.state.alertText}</Toast.Body>
+                </Toast>
+                {/*<Alert show={this.state.showAlert} variant={this.state.alertVariant} onClose={() => this.setState({ showAlert: !this.state.showAlert })} dismissible>*/}
+                {/*    <p>*/}
+                {/*        {this.state.alertText}*/}
+                {/*    </p>*/}
+                {/*</Alert>*/}
             </Container>
         );
     }

@@ -3,7 +3,7 @@
 // tag::pipeline-update-dialog[]
 import React from "react";
 import ReactDOM from "react-dom";
-import {MyModal} from "../utils/Utils";
+import {CustomModal} from "../utils/Utils";
 import * as fai from "@fortawesome/free-solid-svg-icons";
 import {Form} from "react-bootstrap"
 
@@ -25,7 +25,6 @@ export class PipelineUpdateDialog extends React.Component {
             updatedPipeline[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim()
         });
         this.props.onUpdate(this.props.pipeline, updatedPipeline);
-        window.location = '#'
     }
 
     render () {
@@ -37,7 +36,7 @@ export class PipelineUpdateDialog extends React.Component {
         );
 
         return (
-            <MyModal customClass={'mr-1 float-left'} inputs={inputs} callback={this.handleSubmit} title={'Update pipeline'} btnLabel={'Update'} btnIcon={fai.faEdit}/>
+            <CustomModal customClass={'mr-1 float-left'} inputs={inputs} callback={this.handleSubmit} title={'Edit pipeline'} btnLabel={'Edit'} acceptBtnLabel={"Update"} btnIcon={fai.faEdit}/>
         )
     }
 }

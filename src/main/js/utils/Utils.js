@@ -3,16 +3,18 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Button from "react-bootstrap/Button";
 import Modal from 'react-bootstrap/Modal'
 
-export function MyModal (props) {
+export function CustomModal (props) {
     const [show, setShow] = useState(false);
-    const {btnIcon, inputs, customClass, title, btnLabel} = props;
+    const {mode, btnIcon, content, customClass, title, btnLabel, variant} = props;
 
     const icon = btnIcon !== undefined ? <FontAwesomeIcon icon={btnIcon} size={'sm'}/> : <></>;
+
+    const cancelButton = mode === 'delete' ? <Button className={"mr-1"} variant={"light"} onClick={(e) => { setShow(false)}}>No</Button> : <></>;
 
     return (
         <>
             <div className={customClass}>
-                <Button className={'float-right'} variant={'success'} size={'sm'} onClick={() => setShow(true)}>
+                <Button className={'float-right'} variant={variant} size={'sm'} onClick={() => setShow(true)}>
                     {icon}&nbsp;{btnLabel}
                 </Button>
 
@@ -21,9 +23,10 @@ export function MyModal (props) {
                         <Modal.Title>{title}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {inputs}
+                        {content}
                     </Modal.Body>
                     <Modal.Footer>
+                        {cancelButton}
                         <Button variant={'primary'} onClick={(e) => { setShow(false); props.callback(e) }}>{btnLabel}</Button>
                     </Modal.Footer>
                 </Modal>
