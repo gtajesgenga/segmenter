@@ -37,17 +37,12 @@ export class Root extends React.Component {
                         {children}
                     </div>
                 </Row>
-                <Toast className={"bg-" + this.state.alertVariant} show={this.state.showAlert} onClose={() => this.setState({ showAlert: !this.state.showAlert})} delay={5000} autohide>
+                <Toast className={"mx-auto fixed-top bg-" + this.state.alertVariant} show={this.state.showAlert} onClose={() => this.setState({ showAlert: !this.state.showAlert})} delay={5000} autohide>
                     <Toast.Header>
                         <strong className="mr-auto">{this.state.alertTrigger}</strong>
                     </Toast.Header>
                     <Toast.Body>{this.state.alertText}</Toast.Body>
                 </Toast>
-                {/*<Alert show={this.state.showAlert} variant={this.state.alertVariant} onClose={() => this.setState({ showAlert: !this.state.showAlert })} dismissible>*/}
-                {/*    <p>*/}
-                {/*        {this.state.alertText}*/}
-                {/*    </p>*/}
-                {/*</Alert>*/}
             </Container>
         );
     }

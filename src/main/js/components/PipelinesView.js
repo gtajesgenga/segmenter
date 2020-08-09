@@ -53,8 +53,7 @@ export class PipelinesView extends React.Component{
             path: pipeline.entity._links.self.href,
             entity: updatedPipeline,
             headers: {
-                'Content-Type': 'application/json',
-                'If-Match': pipeline.headers.Etag
+                'Content-Type': 'application/json'
             }
         }).done(() => {
             this.loadFromServer(this.state.pageSize);

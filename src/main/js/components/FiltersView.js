@@ -6,7 +6,7 @@ import {FilterList} from "./FilterList";
 import {Button, Form, InputGroup} from "react-bootstrap";
 import ReactDOM from "react-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import * as fai from "@fortawesome/free-solid-svg-icons";
+import {faPlus} from "@fortawesome/free-solid-svg-icons";
 
 
 const root = '/api';
@@ -66,8 +66,7 @@ export class FiltersView extends React.Component{
             path: this.state.selectedPipeline.entity._links.self.href,
             entity: this.state.selectedPipeline.entity,
             headers: {
-                'Content-Type': 'application/json',
-                'If-Match': this.state.selectedPipeline.headers.Etag
+                'Content-Type': 'application/json'
             }
         }).done(() => {
             this.loadFromServer();
@@ -85,8 +84,7 @@ export class FiltersView extends React.Component{
             path: pipeline.entity._links.self.href,
             entity: pipeline.entity,
             headers: {
-                'Content-Type': 'application/json',
-                'If-Match': pipeline.headers.Etag
+                'Content-Type': 'application/json'
             }
         }).done(() => {
             this.loadFromServer();
@@ -144,7 +142,7 @@ export class FiltersView extends React.Component{
                     <Form.Control as={'select'}  size="sm" id="filterSelect" ref="filter" className={"mx-1"}>
                         {filters}
                     </Form.Control>
-                    <Button variant={"success"} size={'sm'} onClick={this.addFilter}><FontAwesomeIcon icon={fai.faPlus}/>&nbsp;Add</Button>
+                    <Button variant={"success"} size={'sm'} onClick={this.addFilter}><FontAwesomeIcon icon={faPlus}/>&nbsp;Add</Button>
                 </Form>
                 <FilterList selectedPipeline={this.state.selectedPipeline} onUpdate={this.onUpdate} onDelete={this.onDelete}/>
             </div>

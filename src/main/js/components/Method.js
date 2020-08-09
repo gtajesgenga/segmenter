@@ -1,8 +1,8 @@
-import * as fai from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 import {CustomModal} from "../utils/Utils";
 import {Form} from "react-bootstrap";
 import {MethodUpdateDialog} from "./MethodUpdateDialog";
+import {faTrash} from "@fortawesome/free-solid-svg-icons";
 
 
 export class Method extends React.Component {
@@ -11,6 +11,12 @@ export class Method extends React.Component {
         super(props);
         this.state = {};
         this.handleDelete = this.handleDelete.bind(this);
+        this.onUpdate = this.onUpdate.bind(this);
+    }
+
+    onUpdate(method) {
+        this.props.filter.methods[this.props.index] = method;
+        this.props.onUpdate(this.props.filter);
     }
 
     handleDelete(e) {
@@ -22,13 +28,17 @@ export class Method extends React.Component {
     render() {
         let parameters = this.props.method.parameters.reduce((str, parameter) => { return str + parameter.value + ","; }, "");
 
+        if (parameters.endsWith(",")) {
+            parameters = parameters.substring(0, parameters.length -1)
+        }
+
         return(
             <tr>
                 <td>{this.props.method.name}</td>
                 <td>{parameters}</td>
                 <td>
-                    <MethodUpdateDialog method={this.props.method} onUpdate={this.props.onUpdate}/>
-                    <CustomModal customClass={"float-left"} mode={"delete"} variant={"danger"} btnIcon={fai.faTrash} btnLabel={"Delete"} title={"Delete method"}
+                    <MethodUpdateDialog method={this.props.method} onUpdate={this.onUpdate}/>
+                    <CustomModal customClass={"float-left"} mode={"delete"} variant={"danger"} btnIcon={faTrash} btnLabel={"Delete"} title={"Delete method"}
                                  content={
                                      <>
                                          <Form.Text className="text-muted">

@@ -4,8 +4,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import {CustomModal} from "../utils/Utils";
-import * as fai from "@fortawesome/free-solid-svg-icons";
 import {Form} from "react-bootstrap"
+import {faEdit} from "@fortawesome/free-solid-svg-icons";
 
 export class PipelineUpdateDialog extends React.Component {
     constructor (props) {
@@ -36,7 +36,7 @@ export class PipelineUpdateDialog extends React.Component {
         );
 
         return (
-            <CustomModal customClass={'mr-1 float-left'} inputs={inputs} callback={this.handleSubmit} title={'Edit pipeline'} btnLabel={'Edit'} acceptBtnLabel={"Update"} btnIcon={fai.faEdit}/>
+            <CustomModal customClass={'mr-1 float-left'} content={inputs} variant={'primary'} callback={this.handleSubmit} title={'Edit pipeline'} btnLabel={'Edit'} acceptBtnLabel={"Update"} btnIcon={faEdit}/>
         )
     }
 }

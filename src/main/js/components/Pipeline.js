@@ -2,10 +2,12 @@
 
 // tag::pipeline[]
 import React from "react";
-import {Button} from "react-bootstrap";
+import {Button, Form} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import * as fai from "@fortawesome/free-solid-svg-icons";
 import {PipelineUpdateDialog} from "./PipelineUpdateDialog";
+import {CustomModal} from "../utils/Utils";
+import {faFilter} from "@fortawesome/free-solid-svg-icons";
+import {faTrash} from "@fortawesome/free-solid-svg-icons";
 
 export class Pipeline extends React.Component {
     constructor (props) {
@@ -28,11 +30,18 @@ export class Pipeline extends React.Component {
                                           excludes={this.props.excludes}
                                           defaults={this.props.defaults}
                                           onUpdate={this.props.onUpdate}/>
-
-                    <Button variant={'danger'} size={'sm'} onClick={this.handleDelete}><FontAwesomeIcon icon={fai.faTrash} size={'sm'}/>&nbsp;Delete</Button>
+                    <CustomModal customClass={"float-left"} mode={"delete"} variant={"danger"} btnIcon={faTrash} btnLabel={"Delete"} title={"Delete pipeline"}
+                                 content={
+                                     <>
+                                         <Form.Text className="text-muted">
+                                             Do you want to remove the pipeline <b>{this.props.pipeline.entity.name}</b>?
+                                         </Form.Text>
+                                     </>}
+                                 callback={this.handleDelete}
+                    />
                     <div className={"ml-1 d-inline-block"}>
                         <Button variant={'primary'} size={"sm"} href={"/ui#/pipelines/" + this.props.pipeline.entity.id + "/filters"}><FontAwesomeIcon
-                        icon={fai.faFilter}
+                        icon={faFilter}
                         size={"sm"}/>&nbsp;Filters</Button>
                     </div>
                 </td>

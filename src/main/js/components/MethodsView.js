@@ -4,7 +4,7 @@ import {Button, Form, InputGroup} from "react-bootstrap";
 import ReactDOM from "react-dom";
 import {MethodList} from "./MethodList";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import * as fai from "@fortawesome/free-solid-svg-icons";
+import {faPlus} from "@fortawesome/free-solid-svg-icons";
 
 const root = '/api/pipelines/';
 
@@ -26,7 +26,7 @@ export class MethodsView extends React.Component{
             method: 'GET',
             path: root + this.props.selectedPipelineId
         }).done(pipeline => {
-            let selectedFilter = pipeline.entity.filters.filter(filter => filter.uuid === this.props.selectedFilterUuid)[0];
+            let selectedFilter = this.state.selectedFilter === undefined ? pipeline.entity.filters.filter(filter => filter.uuid === this.props.selectedFilterUuid)[0] : this.state.selectedFilter;
             this.getAvailableMethods(selectedFilter.filterClass.split(".").pop());
             this.setState({
                 pipeline: pipeline,
@@ -63,14 +63,23 @@ export class MethodsView extends React.Component{
         });
     }
 
-    onUpdate() {
+    onUpdate(filter) {
+        if (filter !== undefined) {
+            let result = this.state.pipeline.entity.filters.findIndex(f => {
+                return f.uuid === filter.uuid && f.className === filter.className
+            });
+
+            if (result > -1) {
+                this.state.pipeline.entity.filters[result] = filter;
+            }
+        }
+
         client({
             method: 'PUT',
             path: this.state.pipeline.entity._links.self.href,
             entity: this.state.pipeline.entity,
             headers: {
-                'Content-Type': 'application/json',
-                'If-Match': this.state.pipeline.headers.Etag
+                'Content-Type': 'application/json'
             }
         }).done(() => {
             this.loadFromServer();
@@ -88,8 +97,7 @@ export class MethodsView extends React.Component{
             path: this.state.pipeline.entity._links.self.href,
             entity: this.state.pipeline.entity,
             headers: {
-                'Content-Type': 'application/json',
-                'If-Match': this.state.pipeline.headers.Etag
+                'Content-Type': 'application/json'
             }
         }).done(() => {
             this.loadFromServer();
@@ -130,7 +138,7 @@ export class MethodsView extends React.Component{
                     <Form.Control as={'select'}  size="sm" id="methodSelect" ref="method" className={"mx-1"}>
                         {methods}
                     </Form.Control>
-                    <Button variant={"success"} size={'sm'} onClick={this.addMethod}><FontAwesomeIcon icon={fai.faPlus}/>&nbsp;Add</Button>
+                    <Button variant={"success"} size={'sm'} onClick={this.addMethod}><FontAwesomeIcon icon={faPlus}/>&nbsp;Add</Button>
                 </Form>
                 <MethodList selectedFilter={this.state.selectedFilter} onUpdate={this.onUpdate} onDelete={this.onDelete}/>
             </div>

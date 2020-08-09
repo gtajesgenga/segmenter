@@ -1,9 +1,9 @@
 import React from "react";
 import {Container, Table, Button} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import * as fai from "@fortawesome/free-solid-svg-icons";
 import {Filter} from "./Filter";
 import 'array.prototype.move';
+import {faSortDown, faSortUp} from "@fortawesome/free-solid-svg-icons";
 
 export class FilterList extends React.Component{
 
@@ -35,17 +35,17 @@ export class FilterList extends React.Component{
             let orderActions = <></>;
             switch (index) {
                 case 0:
-                    orderActions = <Button variant={"outline-primary"} className={"border-0"} size={'sm'} onClick={(e) => this.handleOrder(e, filter.uuid, 1)}><FontAwesomeIcon icon={fai.faSortDown} className={"align-text-top"}/></Button>;
+                    orderActions = <Button variant={"outline-primary"} className={"border-0"} size={'sm'} onClick={(e) => this.handleOrder(e, filter.uuid, 1)}><FontAwesomeIcon icon={faSortDown} className={"align-text-top"}/></Button>;
                     break;
                 case (this.props.selectedPipeline.entity.filters.length - 1) :
-                    orderActions = <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, -1)}><FontAwesomeIcon icon={fai.faSortUp} className={"align-text-bottom"}/></Button>;
+                    orderActions = <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, -1)}><FontAwesomeIcon icon={faSortUp} className={"align-text-bottom"}/></Button>;
                     break;
                 default:
                     orderActions =
                         <>
-                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, 1)}><FontAwesomeIcon icon={fai.faSortDown} className={"align-text-top"}/></Button>
+                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, 1)}><FontAwesomeIcon icon={faSortDown} className={"align-text-top"}/></Button>
                             <>&nbsp;</>
-                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, -1)}><FontAwesomeIcon icon={fai.faSortUp} className={"align-text-bottom"}/></Button>
+                            <Button variant={"outline-primary"} size={'sm'} className={"border-0"} onClick={(e) => this.handleOrder(e, filter.uuid, -1)}><FontAwesomeIcon icon={faSortUp} className={"align-text-bottom"}/></Button>
                         </>;
                     break;
             }

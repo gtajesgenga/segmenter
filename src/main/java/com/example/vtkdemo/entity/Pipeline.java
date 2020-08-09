@@ -1,6 +1,5 @@
 package com.example.vtkdemo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,9 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pipeline {
-
-    private @Version @JsonIgnore
-    Long version;
 
     @Id @Column(name = "id") @GeneratedValue
     private Long id;

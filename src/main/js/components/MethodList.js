@@ -7,12 +7,17 @@ export class MethodList extends React.Component{
 
     constructor(props) {
         super(props);
+        this.onUpdate = this.onUpdate.bind(this);
+    }
+
+    onUpdate() {
+        this.props.onUpdate(this.props.selectedFilter);
     }
 
     render() {
         const methods = this.props.selectedFilter !== undefined ? this.props.selectedFilter.methods.map((method, index) => {
             return (
-                <Method key={method.name} index={index} method={method} filter={this.props.selectedFilter} onDelete={this.props.onDelete} onUpdate={this.props.onUpdate} />
+                <Method key={method.name} index={index} method={method} filter={this.props.selectedFilter} onDelete={this.props.onDelete} onUpdate={this.onUpdate} />
             );
         }) : undefined;
 
