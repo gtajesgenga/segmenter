@@ -33,6 +33,8 @@ public class FilterService {
                         .build())
                 .collect(Collectors.toList());
 
+        results.sort(Filter::compareTo);
+
         return results;
     }
 

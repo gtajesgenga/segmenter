@@ -1,8 +1,10 @@
 import React from "react";
 import client from "../client/client";
-import {Form, InputGroup} from "react-bootstrap";
+import {Button, Form, InputGroup} from "react-bootstrap";
 import ReactDOM from "react-dom";
 import {MethodList} from "./MethodList";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import * as fai from "@fortawesome/free-solid-svg-icons";
 
 const root = '/api/pipelines/';
 
@@ -12,6 +14,7 @@ export class MethodsView extends React.Component{
     constructor(props) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
+        this.addMethod = this.addMethod.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
         this.onDelete = this.onDelete.bind(this);
         this.state = {pipeline: undefined, filters: [], methods: [], selectedFilter: undefined, selectedUuid: undefined};
@@ -24,7 +27,7 @@ export class MethodsView extends React.Component{
             path: root + this.props.selectedPipelineId
         }).done(pipeline => {
             let selectedFilter = pipeline.entity.filters.filter(filter => filter.uuid === this.props.selectedFilterUuid)[0];
-            this.getAvailableMethods(selectedFilter.filterClass);
+            this.getAvailableMethods(selectedFilter.filterClass.split(".").pop());
             this.setState({
                 pipeline: pipeline,
                 filters: pipeline.entity.filters,
@@ -32,6 +35,14 @@ export class MethodsView extends React.Component{
                 selectedUuid: selectedFilter.uuid
             });
         })
+    }
+
+    addMethod(e) {
+        e.preventDefault();
+        const selectedId = ReactDOM.findDOMNode(this.refs.method).value;
+        const method = this.state.methods[selectedId];
+        this.state.selectedFilter.methods.push(method);
+        this.onUpdate();
     }
 
     handleChange(e) {
@@ -48,7 +59,7 @@ export class MethodsView extends React.Component{
             method: 'GET',
             path: '/api/filters/' + selectedLabel
         }).done(response => {
-            this.setState({methods: response.data.methods})
+            this.setState({methods: response.entity.methods})
         });
     }
 
@@ -104,23 +115,24 @@ export class MethodsView extends React.Component{
 
         return (
             <div>
-                <Form inline className={"mb-3 d-flex justify-content-end"}>
-                    <InputGroup.Prepend>
-                        <Form.Label htmlFor="methodSelect" column={"sm"} className={"pl-0 pr-1"}>Methods:</Form.Label>
-                    </InputGroup.Prepend>
-                    <Form.Control as={'select'}  size="sm" id="methodSelect" ref="method">
-                        {methods}
-                    </Form.Control>
-                </Form>
-                <Form inline className={"mb-3 d-flex justify-content-end"}>
+                <Form inline className={"mb-3 d-flex-inline justify-content-end float-left"}>
                     <InputGroup.Prepend>
                         <Form.Label htmlFor="filterSelect" column={"sm"} className={"pl-0 pr-1"}>Filter:</Form.Label>
                     </InputGroup.Prepend>
-                    <Form.Control as={'select'}  size="sm" id="filterSelect" ref="filter" value={this.state.selectedUuid} onChange={this.handleChange}>
+                    <Form.Control as={'select'}  size="sm" id="filterSelect" ref="filter" value={this.state.selectedUuid} onChange={this.handleChange} className={"mx-1"}>
                         {filters}
                     </Form.Control>
                 </Form>
-                <MethodList selectedFilter={this.state.selectedFilter} onUpdate={this.onUpdate} onDelete={this.onDelete} onUpdate={this.onUpdate}/>
+                <Form inline className={"mb-3 d-flex-inline justify-content-end float-right"}>
+                    <InputGroup.Prepend>
+                        <Form.Label htmlFor="methodSelect" column={"sm"} className={"pl-0 pr-1"}>Methods:</Form.Label>
+                    </InputGroup.Prepend>
+                    <Form.Control as={'select'}  size="sm" id="methodSelect" ref="method" className={"mx-1"}>
+                        {methods}
+                    </Form.Control>
+                    <Button variant={"success"} size={'sm'} onClick={this.addMethod}><FontAwesomeIcon icon={fai.faPlus}/>&nbsp;Add</Button>
+                </Form>
+                <MethodList selectedFilter={this.state.selectedFilter} onUpdate={this.onUpdate} onDelete={this.onDelete}/>
             </div>
         );
     }

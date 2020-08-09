@@ -9,7 +9,7 @@ export function CustomModal (props) {
 
     const icon = btnIcon !== undefined ? <FontAwesomeIcon icon={btnIcon} size={'sm'}/> : <></>;
 
-    const cancelButton = mode === 'delete' ? <Button className={"mr-1"} variant={"light"} onClick={(e) => { setShow(false)}}>No</Button> : <></>;
+    const cancelButton = mode === 'delete' ? <Button className={"mr-1"} variant={"light"} onClick={() => { setShow(false)}}>No</Button> : <></>;
 
     return (
         <>

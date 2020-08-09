@@ -3,8 +3,10 @@ import follow from "../client/follow";
 import client from "../client/client";
 import when from "when";
 import {FilterList} from "./FilterList";
-import {Form, InputGroup} from "react-bootstrap";
+import {Button, Form, InputGroup} from "react-bootstrap";
 import ReactDOM from "react-dom";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import * as fai from "@fortawesome/free-solid-svg-icons";
 
 
 const root = '/api';
@@ -13,9 +15,11 @@ export class FiltersView extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = { pipelines: [], selectedPipeline: undefined, selectedId: this.props.selectedId};
+        this.state = { pipelines: [], filters: [], selectedPipeline: undefined, selectedId: this.props.selectedId};
+        this.addFilter = this.addFilter.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
+        this.onDelete = this.onDelete.bind(this);
         this.selectPipeline = this.selectPipeline.bind(this);
     }
 
@@ -37,11 +41,42 @@ export class FiltersView extends React.Component{
                 pipelines: pipelines
             });
             this.selectPipeline(this.props.selectedId);
+            this.getAvailableFilters();
         })
+    }
+
+    getAvailableFilters() {
+        client({
+            method: 'GET',
+            path: '/api/filters'
+        }).done(response => {
+            this.setState({filters: response.entity._embedded.filters})
+        });
     }
 
     componentDidMount() {
         this.loadFromServer();
+    }
+
+    onDelete(index) {
+        this.state.selectedPipeline.entity.filters.splice(index, 1);
+
+        client({
+            method: 'PUT',
+            path: this.state.selectedPipeline.entity._links.self.href,
+            entity: this.state.selectedPipeline.entity,
+            headers: {
+                'Content-Type': 'application/json',
+                'If-Match': this.state.selectedPipeline.headers.Etag
+            }
+        }).done(() => {
+            this.loadFromServer();
+            this.props.showAlert('Methods', 'success', 'pipeline ' + this.state.selectedPipeline.entity.id + ' was updated.');
+        }, response => {
+            if (response.status.code === 412) {
+                this.props.showAlert('Methods', 'danger', 'DENIED: Unable to update ' + this.state.selectedPipeline.entity.id + '. Your copy is stale.');
+            }
+        });
     }
 
     onUpdate(pipeline) {
@@ -63,6 +98,15 @@ export class FiltersView extends React.Component{
         });
     }
 
+    addFilter(e) {
+        e.preventDefault();
+        const selectedId = ReactDOM.findDOMNode(this.refs.filter).value;
+        const filter = JSON.parse(JSON.stringify(this.state.filters[selectedId]));
+        filter.methods = [];
+        this.state.selectedPipeline.entity.filters.push(filter);
+        this.onUpdate(this.state.selectedPipeline);
+    }
+
     handleChange(e) {
         e.preventDefault();
         const selectedPipeline = ReactDOM.findDOMNode(this.refs.pipeline).value;
@@ -79,18 +123,30 @@ export class FiltersView extends React.Component{
         const pipelines = this.state.pipelines.map(pipeline =>
             <option key={pipeline.entity._links.self.href} value={pipeline.entity.id}>{pipeline.entity.name}</option>
         );
+        const filters = this.state.filters.map((filter, index) =>
+            <option key={filter.filterClass.split(".").pop() + index} value={index}>{filter.filterClass.split(".").pop()}</option>
+        );
 
         return (
             <div>
-                <Form inline className={"mb-3 d-flex justify-content-end"}>
+                <Form inline className={"mb-3 d-flex-inline justify-content-end float-left"}>
                     <InputGroup.Prepend>
                         <Form.Label htmlFor="pipelineSelect" column={"sm"} className={"pl-0 pr-1"}>Pipeline:</Form.Label>
                     </InputGroup.Prepend>
-                    <Form.Control as={'select'}  size="sm" className="col-1" id="pipelineSelect" ref="pipeline" value={this.state.selectedId} onChange={this.handleChange}>
+                    <Form.Control as={'select'}  size="sm" id="pipelineSelect" ref="pipeline" value={this.state.selectedId} onChange={this.handleChange} className={"mx-1"}>
                         {pipelines}
                     </Form.Control>
                 </Form>
-                <FilterList selectedPipeline={this.state.selectedPipeline} onUpdate={this.onUpdate}/>
+                <Form inline className={"mb-3 d-flex-inline justify-content-end float-right"}>
+                    <InputGroup.Prepend>
+                        <Form.Label htmlFor="filterSelect" column={"sm"} className={"pl-0 pr-1"}>Filters:</Form.Label>
+                    </InputGroup.Prepend>
+                    <Form.Control as={'select'}  size="sm" id="filterSelect" ref="filter" className={"mx-1"}>
+                        {filters}
+                    </Form.Control>
+                    <Button variant={"success"} size={'sm'} onClick={this.addFilter}><FontAwesomeIcon icon={fai.faPlus}/>&nbsp;Add</Button>
+                </Form>
+                <FilterList selectedPipeline={this.state.selectedPipeline} onUpdate={this.onUpdate} onDelete={this.onDelete}/>
             </div>
         );
     }

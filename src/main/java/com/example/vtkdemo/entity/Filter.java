@@ -11,10 +11,15 @@ import lombok.NoArgsConstructor;
 @Builder()
 @NoArgsConstructor
 @AllArgsConstructor
-public class Filter {
+public class Filter implements Comparable<Filter> {
 
     @Builder.Default
     private String uuid = UUID.randomUUID().toString();
     private String filterClass;
     private List<Method> methods;
+
+    @Override
+    public int compareTo(Filter o) {
+        return this.filterClass.compareTo(o.filterClass);
+    }
 }

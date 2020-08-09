@@ -57,7 +57,7 @@ export class PipelinesView extends React.Component{
                 'If-Match': pipeline.headers.Etag
             }
         }).done(() => {
-            this.loadFromServer(this.state.pageSize)
+            this.loadFromServer(this.state.pageSize);
             this.props.showAlert('Pipelines', 'success', 'pipeline ' + pipeline.entity.id + ' was updated.');
         }, response => {
             if (response.status.code === 412) {

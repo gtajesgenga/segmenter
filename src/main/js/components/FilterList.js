@@ -51,7 +51,7 @@ export class FilterList extends React.Component{
             }
 
             return (
-                <Filter key={filter.uuid} pipeline={this.props.selectedPipeline} order={index} filter={filter} orderActions={orderActions}/>
+                <Filter key={filter.uuid} pipeline={this.props.selectedPipeline} order={index} filter={filter} orderActions={orderActions} onDelete={this.props.onDelete}/>
             );
         }) : undefined;
 

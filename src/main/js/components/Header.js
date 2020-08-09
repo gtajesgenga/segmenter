@@ -2,7 +2,7 @@ import React from 'react';
 import {Nav, Navbar} from "react-bootstrap";
 import {useLocation} from 'react-router-dom';
 
-export const Header = (props) => {
+export const Header = () => {
     let location = useLocation();
 
     return (
