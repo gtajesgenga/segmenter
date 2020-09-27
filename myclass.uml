@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="300.5" y="0.0">org.itk.simple.ImageFilter_1</node>
+    <node x="248.0" y="76.0">org.itk.simple.GrayscaleFillholeImageFilter</node>
+    <node x="510.0" y="76.0">org.itk.simple.IntensityWindowingImageFilter</node>
+    <node x="0.0" y="76.0">org.itk.simple.BinaryThresholdImageFilter</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.itk.simple.BinaryThresholdImageFilter" target="org.itk.simple.ImageFilter_1">
+      <point x="0.0" y="-13.0" />
+      <point x="114.0" y="51.0" />
+      <point x="323.3333333333333" y="51.0" />
+      <point x="-45.666666666666686" y="13.0" />
+    </edge>
+    <edge source="org.itk.simple.IntensityWindowingImageFilter" target="org.itk.simple.ImageFilter_1">
+      <point x="0.0" y="-13.0" />
+      <point x="634.5" y="51.0" />
+      <point x="414.66666666666663" y="51.0" />
+      <point x="45.66666666666663" y="13.0" />
+    </edge>
+    <edge source="org.itk.simple.GrayscaleFillholeImageFilter" target="org.itk.simple.ImageFilter_1">
+      <point x="0.0" y="-13.0" />
+      <point x="0.0" y="13.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="380.0" y="51.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

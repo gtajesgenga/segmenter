@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.example.vtkdemo.entity.Filter</OriginalElement>
+  <nodes>
+    <node x="380.0" y="371.0">com.example.vtkdemo.entity.Parameter.ParameterBuilder</node>
+    <node x="11.0" y="719.0">com.example.vtkdemo.entity.Method</node>
+    <node x="-15.5" y="1059.0">com.example.vtkdemo.entity.Method.MethodBuilder</node>
+    <node x="373.5" y="167.0">com.example.vtkdemo.entity.Filter.FilterBuilder</node>
+    <node x="78.0" y="-25.0">java.lang.Comparable</node>
+    <node x="423.5" y="659.0">com.example.vtkdemo.entity.Parameter</node>
+    <node x="31.0" y="95.0">com.example.vtkdemo.entity.Filter</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.example.vtkdemo.entity.Filter" target="java.lang.Comparable">
+      <point x="0.0" y="-145.0" />
+      <point x="0.0" y="25.0" />
+    </edge>
+    <edge source="com.example.vtkdemo.entity.Filter" target="com.example.vtkdemo.entity.Method">
+      <point x="0.0" y="145.0" />
+      <point x="0.0" y="-121.0" />
+    </edge>
+    <edge source="com.example.vtkdemo.entity.Method" target="com.example.vtkdemo.entity.Parameter">
+      <point x="149.0" y="-0.0" />
+      <point x="-136.5" y="-0.0" />
+    </edge>
+    <edge source="com.example.vtkdemo.entity.Parameter.ParameterBuilder" target="com.example.vtkdemo.entity.Parameter">
+      <point x="0.0" y="109.0" />
+      <point x="0.0" y="-181.0" />
+    </edge>
+    <edge source="com.example.vtkdemo.entity.Filter.FilterBuilder" target="com.example.vtkdemo.entity.Filter">
+      <point x="-146.5" y="-0.0" />
+      <point x="129.0" y="-0.0" />
+    </edge>
+    <edge source="com.example.vtkdemo.entity.Method.MethodBuilder" target="com.example.vtkdemo.entity.Method">
+      <point x="0.0" y="-61.0" />
+      <point x="0.0" y="121.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="973.5120887925289" y="661.5220428812336" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Inner Classes</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

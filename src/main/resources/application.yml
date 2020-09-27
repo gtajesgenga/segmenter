@@ -18,6 +18,13 @@ spring:
             non_contextual_creation: true
     open-in-view: false
 
+  data:
+    rest:
+      base-path: /api
+
+  thymeleaf:
+    cache: false
+
 logging:
   level:
     root: INFO

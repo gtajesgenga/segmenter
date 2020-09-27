@@ -2,10 +2,10 @@ package com.example.vtkdemo.service;
 
 import com.example.vtkdemo.client.OrthancClient;
 import com.example.vtkdemo.config.ApplicationConfig;
-import com.example.vtkdemo.entity.PipelineEntity;
-import com.example.vtkdemo.model.FilterDto;
-import com.example.vtkdemo.model.Method;
-import com.example.vtkdemo.model.Parameter;
+import com.example.vtkdemo.entity.Pipeline;
+import com.example.vtkdemo.entity.Filter;
+import com.example.vtkdemo.entity.Method;
+import com.example.vtkdemo.entity.Parameter;
 import com.example.vtkdemo.repository.PipelineRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -30,20 +30,20 @@ import java.util.stream.Stream;
 @Slf4j
 public class VtkService {
 
-    static
-    {
-        if (!vtkNativeLibrary.LoadAllNativeLibraries())
-        {
-            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
-            {
-                if (!lib.IsLoaded())
-                {
-                    System.out.println(lib.GetLibraryName() + " not loaded");
-                }
-            }
-        }
-        vtkNativeLibrary.DisableOutputWindow(null);
-    }
+//    static
+//    {
+//        if (!vtkNativeLibrary.LoadAllNativeLibraries())
+//        {
+//            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
+//            {
+//                if (!lib.IsLoaded())
+//                {
+//                    System.out.println(lib.GetLibraryName() + " not loaded");
+//                }
+//            }
+//        }
+//        vtkNativeLibrary.DisableOutputWindow(null);
+//    }
 
     private final Stack<Image> images = new Stack<>();
 
@@ -66,7 +66,7 @@ public class VtkService {
         log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
         log.info("Instances {}", Arrays.toString(instances.toArray()));
 
-        Optional<PipelineEntity> pipeline = pipelineRepository.findById(pipelineId);
+        Optional<Pipeline> pipeline = pipelineRepository.findById(pipelineId);
 
         if (pipeline.isPresent()) {
             Path path = null;
@@ -100,7 +100,7 @@ public class VtkService {
 
             //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
-            for (FilterDto filter : pipeline.get().getPipelineDto().getFilters()) {
+            for (Filter filter : pipeline.get().getFilters()) {
                 processFilter(filter);
             }
 
@@ -136,7 +136,7 @@ public class VtkService {
         return new byte[0];
     }
 
-    private void processFilter(FilterDto filter) throws InvocationTargetException {
+    private void processFilter(Filter filter) throws InvocationTargetException {
 
         try {
             Object instance = Class.forName(filter.getFilterClass()).getConstructor().newInstance();

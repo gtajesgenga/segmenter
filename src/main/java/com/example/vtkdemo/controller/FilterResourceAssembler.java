@@ -1,20 +1,20 @@
 package com.example.vtkdemo.controller;
 
-import com.example.vtkdemo.model.FilterDto;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceAssembler;
+import com.example.vtkdemo.entity.Filter;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class FilterResourceAssembler implements ResourceAssembler<FilterDto, Resource<FilterDto>> {
+public class FilterResourceAssembler implements RepresentationModelAssembler<Filter, EntityModel<Filter>> {
 
     @Override
-    public Resource<FilterDto> toResource(FilterDto filterDto) {
-        String name = filterDto.getFilterClass().substring(filterDto.getFilterClass().lastIndexOf('.')+1);
-        return new Resource<>(filterDto,
+    public EntityModel<Filter> toModel(Filter filter) {
+        String name = filter.getFilterClass().substring(filter.getFilterClass().lastIndexOf('.') + 1);
+        return EntityModel.of(filter,
                 linkTo(methodOn(FilterController.class).findByName(name)).withSelfRel(),
                 linkTo(methodOn(FilterController.class).findAll()).withRel("filters"));
     }

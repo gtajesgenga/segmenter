@@ -5,26 +5,26 @@
   <version>8.2-SNAPSHOT</version>
   <versioning>
     <snapshot>
-      <timestamp>20200223.193541</timestamp>
+      <timestamp>20200726.102146</timestamp>
       <buildNumber>1</buildNumber>
     </snapshot>
-    <lastUpdated>20200223193541</lastUpdated>
+    <lastUpdated>20200726102146</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>8.2-20200223.193541-1</value>
-        <updated>20200223193541</updated>
+        <value>8.2-20200726.102146-1</value>
+        <updated>20200726102146</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>8.2-20200223.193541-1</value>
-        <updated>20200223193541</updated>
+        <value>8.2-20200726.102146-1</value>
+        <updated>20200726102146</updated>
       </snapshotVersion>
       <snapshotVersion>
         <classifier>natives-Linux-x86_64</classifier>
         <extension>jar</extension>
-        <value>8.2-20200223.193541-1</value>
-        <updated>20200223193541</updated>
+        <value>8.2-20200726.102146-1</value>
+        <updated>20200726102146</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>

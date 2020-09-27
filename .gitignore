@@ -32,8 +32,7 @@ build/
 .vscode/
 
 node_modules/
+src/main/resources/static/built/
 package-lock.json
-package.json
-webpack.config.js
 webpack.generated.js
 

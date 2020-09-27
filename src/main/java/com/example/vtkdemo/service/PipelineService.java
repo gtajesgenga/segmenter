@@ -2,8 +2,7 @@ package com.example.vtkdemo.service;
 
 import com.example.vtkdemo.client.OrthancClient;
 import com.example.vtkdemo.config.ApplicationConfig;
-import com.example.vtkdemo.entity.PipelineEntity;
-import com.example.vtkdemo.model.PipelineRequest;
+import com.example.vtkdemo.entity.Pipeline;
 import com.example.vtkdemo.repository.PipelineRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +21,18 @@ public class PipelineService {
         this.pipelineRepository = pipelineRepository;
     }
 
-    public PipelineEntity createPipeline(PipelineRequest pipeline) {
-        return pipelineRepository.save(PipelineEntity.builder()
+    public Pipeline createPipeline(Pipeline pipeline) {
+        return pipelineRepository.save(Pipeline.builder()
                 .name(pipeline.getName())
-                .pipelineDto(pipeline.getPipelineDto())
+                .filters(pipeline.getFilters())
                 .build());
     }
 
-    public List<PipelineEntity> findAll() {
+    public List<Pipeline> findAll() {
         return pipelineRepository.findAll();
     }
 
-    public Optional<PipelineEntity> findById(Long id) {
+    public Optional<Pipeline> findById(Long id) {
         return pipelineRepository.findById(id);
     }
 
@@ -41,13 +40,13 @@ public class PipelineService {
         pipelineRepository.deleteById(id);
     }
 
-    public Optional<PipelineEntity> updateById(Long id, PipelineRequest pipeline) {
-        Optional<PipelineEntity> old = findById(id);
+    public Optional<Pipeline> updateById(Long id, Pipeline pipeline) {
+        Optional<Pipeline> old = findById(id);
 
         if (old.isPresent()) {
-            PipelineEntity entity = old.get();
+            Pipeline entity = old.get();
             entity.setName(pipeline.getName());
-            entity.setPipelineDto(pipeline.getPipelineDto());
+            entity.setFilters(pipeline.getFilters());
             return Optional.of(pipelineRepository.save(entity));
         }
         return old;

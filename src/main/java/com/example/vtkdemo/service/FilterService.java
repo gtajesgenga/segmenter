@@ -1,17 +1,19 @@
 package com.example.vtkdemo.service;
 
-import com.example.vtkdemo.model.FilterDto;
-import com.example.vtkdemo.model.Method;
-import com.example.vtkdemo.model.Parameter;
+import com.example.vtkdemo.entity.Filter;
+import com.example.vtkdemo.entity.Method;
+import com.example.vtkdemo.entity.Parameter;
 import javassist.Modifier;
 import org.apache.commons.lang3.ClassUtils;
 import org.itk.simple.ImageFilter_1;
 import org.reflections.Reflections;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Service
 public class FilterService {
 
     private static Map<String, List<Method>> filtersMap;
@@ -21,23 +23,25 @@ public class FilterService {
                 .collect(Collectors.toMap(Class::getCanonicalName, clazz -> getMethods(clazz.getMethods())));
     }
 
-    public static List<FilterDto> findAll() {
-        List<FilterDto> results;
+    public static List<Filter> findAll() {
+        List<Filter> results;
 
         results = filtersMap.entrySet().stream()
-                .map(filter -> FilterDto.builder()
+                .map(filter -> Filter.builder()
                         .filterClass(filter.getKey())
                         .methods(filter.getValue())
                         .build())
                 .collect(Collectors.toList());
 
+        results.sort(Filter::compareTo);
+
         return results;
     }
 
-    public static Optional<FilterDto> find(String className) {
+    public static Optional<Filter> find(String className) {
         return filtersMap.entrySet().stream()
-                .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') +1 ).equals(className))
-                .map(filter -> FilterDto.builder()
+                .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') + 1).equals(className))
+                .map(filter -> Filter.builder()
                         .filterClass(filter.getKey())
                         .methods(filter.getValue())
                         .build())
