@@ -3,6 +3,9 @@ package com.example.vtkdemo.controller;
 import com.example.vtkdemo.config.ApplicationConfig;
 import com.example.vtkdemo.service.VtkService;
 import com.sun.istack.NotNull;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.http.MediaType;
@@ -30,6 +33,10 @@ public class VtkController {
     }
 
     @GetMapping(value = "/study/{studyId}/serie/{serieId}/pipeline/{pipelineId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    @Operation(summary = "Get a vtk file with segmented volume")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful retrieval of segmentation")
+    })
     @ResponseBody
     public ResponseEntity<byte[]> getVTK(@NotNull @PathVariable String studyId,
                                          @NotNull @PathVariable String serieId,
