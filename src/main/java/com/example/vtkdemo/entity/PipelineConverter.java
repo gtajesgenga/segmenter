@@ -7,7 +7,7 @@ import javax.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.List;
 
-public class PipelineConverter implements AttributeConverter<List<Filter>, String> {
+class PipelineConverter implements AttributeConverter<List<Filter>, String> {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

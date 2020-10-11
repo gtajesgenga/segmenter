@@ -39,7 +39,7 @@ public class ApplicationConfig {
         }
     }
 
-    @Bean
+    @Bean(name = "restTemplate")
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder
                 .build();

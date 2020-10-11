@@ -5,6 +5,7 @@ import com.example.vtkdemo.client.model.QueryRequestModel;
 import com.example.vtkdemo.config.OrthancServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,7 @@ public class OrthancClient {
     private final OrthancServerConfig orthancServerConfig;
 
     private final RestTemplate restTemplate;
+
 
     @Autowired public OrthancClient(OrthancServerConfig orthancServerConfig, RestTemplate restTemplate) {
         this.orthancServerConfig = orthancServerConfig;

@@ -38,7 +38,7 @@ public class Parameter {
     @ApiModelProperty(value = "Parameter value", accessMode = ApiModelProperty.AccessMode.READ_WRITE, example = "255")
     private String value;
 
-    public Parameter(String name, Class defaultCasting, Class multidimensionalClass, String multidimensional, String casting, String value) {
+    private Parameter(String name, Class defaultCasting, Class multidimensionalClass, String multidimensional, String casting, String value) {
         this.name = name;
         this.defaultCasting = defaultCasting;
         this.multidimensionalClass = multidimensionalClass;
@@ -47,7 +47,7 @@ public class Parameter {
         this.value = value;
     }
 
-    public void setCasting(String casting) {
+    private void setCasting(String casting) {
         this.casting = casting;
         try {
             this.defaultCasting = Class.forName(this.casting);
@@ -64,7 +64,7 @@ public class Parameter {
         }
     }
 
-    public void setMultidimensional(String multidimensional) {
+    private void setMultidimensional(String multidimensional) {
         this.multidimensional = multidimensional;
 
         if (this.multidimensional != null) {

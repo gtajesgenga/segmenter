@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 @Service
 public class FilterService {
 
-    private static Map<String, List<Method>> filtersMap;
+    private static final Map<String, List<Method>> filtersMap;
 
     static {
         filtersMap = getSubtypes().stream()
