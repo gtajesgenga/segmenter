@@ -1,27 +1,39 @@
 package com.example.vtkdemo.config;
 
-import com.example.vtkdemo.client.LoggingRequestInterceptor;
+import javax.annotation.PostConstruct;
+import javax.servlet.Filter;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
+import com.example.vtkdemo.client.LoggingRequestInterceptor;
+import com.example.vtkdemo.logging.AccessLogFilter;
+
+import io.micrometer.core.aop.CountedAspect;
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @ConfigurationProperties(prefix = "application")
 @Getter
 @Setter
 @Slf4j
+@EnableAspectJAutoProxy
 public class ApplicationConfig {
 
+    private static final String ACCESS_LOG_FILTER = "AccessLogFilter";
     String tempFolder;
 
     Boolean restTemplateLogin;
@@ -47,5 +59,35 @@ public class ApplicationConfig {
             restTemplate.setInterceptors(Collections.singletonList(new LoggingRequestInterceptor()));
         }
         return restTemplate;
+    }
+
+    @Bean
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+        return registry -> registry.config().commonTags("application", "vtkdemo");
+    }
+
+    @Bean
+    public AccessLogFilter accessLogFilter() {
+        return new AccessLogFilter();
+    }
+
+    @Bean
+    public FilterRegistrationBean<Filter> accessLogFilterRegistration(AccessLogFilter filter) {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(filter);
+        registrationBean.addUrlPatterns("/*");
+        registrationBean.setName(ACCESS_LOG_FILTER);
+        registrationBean.setOrder(1);
+        return registrationBean;
+    }
+
+    @Bean
+    public CountedAspect countedAspect(PrometheusMeterRegistry registry) {
+        return new CountedAspect(registry);
+    }
+
+    @Bean
+    public TimedAspect timedAspect(PrometheusMeterRegistry registry) {
+        return new TimedAspect(registry);
     }
 }

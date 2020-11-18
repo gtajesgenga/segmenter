@@ -3,6 +3,8 @@ package com.example.vtkdemo.client;
 import com.example.vtkdemo.client.model.FindRequestModel;
 import com.example.vtkdemo.client.model.QueryRequestModel;
 import com.example.vtkdemo.config.OrthancServerConfig;
+import com.example.vtkdemo.logging.EnableOutgoingLogging;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,6 +34,7 @@ public class OrthancClient {
         this.restTemplate = restTemplate;
     }
 
+    @EnableOutgoingLogging
     public List<String> getInstances(String studyId, String serieId) {
         FindRequestModel findRequestModel = FindRequestModel.builder()
                 .Level(INSTANCE)
@@ -59,6 +62,7 @@ public class OrthancClient {
         return restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
     }
 
+    @EnableOutgoingLogging
     public byte[] fetchInstance(String instance) {
 
         UriComponents uriComponents = UriComponentsBuilder.newInstance()

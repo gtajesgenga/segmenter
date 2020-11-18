@@ -15,6 +15,8 @@ import com.example.vtkdemo.entity.Filter;
 import com.example.vtkdemo.exceptions.ResourceNotFoundException;
 import com.example.vtkdemo.service.FilterService;
 
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,24 +28,30 @@ import java.util.stream.Collectors;
 public class FilterController {
 
     private final FilterResourceAssembler filterResourceAssembler;
+    private final FilterService filterService;
 
-    public FilterController(FilterResourceAssembler filterResourceAssembler) {
+    public FilterController(FilterResourceAssembler filterResourceAssembler, FilterService filterService) {
         this.filterResourceAssembler = filterResourceAssembler;
+        this.filterService = filterService;
     }
 
+    @Counted
+    @Timed
     @GetMapping
     @Operation(summary = "Get all available filters with their methods")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful retrieval of available filters list")
     })
     public CollectionModel<EntityModel<Filter>> findAll() {
-        List<EntityModel<Filter>> filters = FilterService.findAll().stream()
+        List<EntityModel<Filter>> filters = filterService.findAll().stream()
                 .map(filterResourceAssembler::toModel)
                 .collect(Collectors.toList());
 
         return CollectionModel.of(filters, linkTo(methodOn(this.getClass()).findAll()).withSelfRel());
     }
 
+    @Counted
+    @Timed
     @GetMapping("/{name}")
     @Operation(summary = "Get a filters by its class name or canonical name")
     @ApiResponses(value = {
@@ -51,7 +59,7 @@ public class FilterController {
             @ApiResponse(responseCode = "404", description = "Unsuccessful retrieval of filter")
     })
     public EntityModel<Filter> findByName(@PathVariable String name) {
-        Filter filter = FilterService.find(name)
+        Filter filter = filterService.find(name)
                 .orElseThrow(() -> new ResourceNotFoundException(name, Filter.class.getSimpleName(), "name"));
 
         return filterResourceAssembler.toModel(filter);

@@ -3,6 +3,9 @@ package com.example.vtkdemo.service;
 import com.example.vtkdemo.entity.Filter;
 import com.example.vtkdemo.entity.Method;
 import com.example.vtkdemo.entity.Parameter;
+
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import javassist.Modifier;
 import org.apache.commons.lang3.ClassUtils;
 import org.itk.simple.ImageFilter;
@@ -23,7 +26,9 @@ public class FilterService {
                 .collect(Collectors.toMap(Class::getCanonicalName, clazz -> getMethods(clazz.getMethods())));
     }
 
-    public static List<Filter> findAll() {
+    @Counted
+    @Timed
+    public List<Filter> findAll() {
         List<Filter> results;
 
         results = filtersMap.entrySet().stream()
@@ -38,7 +43,9 @@ public class FilterService {
         return results;
     }
 
-    public static Optional<Filter> find(String className) {
+    @Counted
+    @Timed
+    public Optional<Filter> find(String className) {
         return filtersMap.entrySet().stream()
                 .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') + 1).equals(className))
                 .map(filter -> Filter.builder()
