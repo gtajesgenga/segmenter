@@ -37,6 +37,16 @@ management:
     web:
       exposure:
         include: "*"
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 5s
 
 application:
   tempFolder: ${BUILD_DIR:.}/tmp
