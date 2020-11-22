@@ -30,20 +30,20 @@ import java.util.stream.Stream;
 @Slf4j
 public class VtkService {
 
-//    static
-//    {
-//        if (!vtkNativeLibrary.LoadAllNativeLibraries())
-//        {
-//            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
-//            {
-//                if (!lib.IsLoaded())
-//                {
-//                    System.out.println(lib.GetLibraryName() + " not loaded");
-//                }
-//            }
-//        }
-//        vtkNativeLibrary.DisableOutputWindow(null);
-//    }
+    static
+    {
+        if (!vtkNativeLibrary.LoadAllNativeLibraries())
+        {
+            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
+            {
+                if (!lib.IsLoaded())
+                {
+                    System.out.println(lib.GetLibraryName() + " not loaded");
+                }
+            }
+        }
+        vtkNativeLibrary.DisableOutputWindow(null);
+    }
 
     private final Stack<Image> images = new Stack<>();
 
@@ -98,7 +98,7 @@ public class VtkService {
 
             images.push(imageSeriesReader.execute());
 
-            //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
             for (Filter filter : pipeline.get().getFilters()) {
                 processFilter(filter);
@@ -146,7 +146,7 @@ public class VtkService {
                     .forEach(method -> processMethod(instance, method));
 
             images.push((Image) instance.getClass().getMethod("execute", images.peek().getClass()).invoke(instance, images.peek()));
-            //SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
         } catch (InstantiationException e) {
             log.error("Error creating new instance of '{}'", filter.getFilterClass(), e);
         } catch (NoSuchMethodException e) {
@@ -208,23 +208,24 @@ public class VtkService {
 
                 Object instance = parameter.getDefaultCasting().getConstructor(long.class).newInstance(strArray.length);
 
-                var ref = new Object() {
-                    int i = 0;
-                };
+//                var ref = new Object() {
+//                    int i = 0;
+//                };
+                final int[] i = {0};
                 Stream.of(strArray)
                         .forEach(s -> {
                             try {
                                 Object value;
                                 if (s.endsWith("%")) {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s.replace("%", ""));
-                                    value = Math.round(images.peek().getSize().get(ref.i) * Long.valueOf(value.toString()) / 100);
+                                    value = Math.round(images.peek().getSize().get(i[0]) * Long.valueOf(value.toString()) / 100);
                                 } else {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s);
                                 }
                                 instance.getClass().getMethod("set", int.class, parameter.getMultidimensionalClass()
                                         .getMethod(parameter.getMultidimensionalClass().getSimpleName().toLowerCase().replace("integer", "int") + "Value").getReturnType())
-                                        .invoke(instance, ref.i, value);
-                            ref.i++;
+                                        .invoke(instance, i[0], value);
+                            i[0]++;
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
                             } catch (InvocationTargetException e) {
@@ -266,7 +267,7 @@ public class VtkService {
                     }
                     return clazz;
                 })
-                .collect(Collectors.toUnmodifiableList()).toArray(new Class[0]);
+                .collect(Collectors.toList()).toArray(new Class[0]);
     }
 
     private static void gc() {

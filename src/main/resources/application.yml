@@ -36,7 +36,7 @@ management:
   endpoints:
     web:
       exposure:
-        exclude: "*"
+        include: "*"
 
 application:
   tempFolder: ${BUILD_DIR:.}/tmp
