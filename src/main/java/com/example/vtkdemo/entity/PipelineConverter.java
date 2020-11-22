@@ -1,6 +1,7 @@
 package com.example.vtkdemo.entity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.AttributeConverter;
@@ -25,8 +26,11 @@ class PipelineConverter implements AttributeConverter<List<Filter>, String> {
     @Override
     public List<Filter> convertToEntityAttribute(String s) {
         List<Filter> filters = null;
+        TypeReference<List<Filter>> typeRef
+                = new TypeReference<List<Filter>>() {
+        };
         try {
-            filters = objectMapper.readValue(s, List.class);
+            filters = objectMapper.readValue(s, typeRef);
         } catch (IOException e) {
             e.printStackTrace();
         }

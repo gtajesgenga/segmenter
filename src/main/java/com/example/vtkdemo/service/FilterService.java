@@ -5,7 +5,7 @@ import com.example.vtkdemo.entity.Method;
 import com.example.vtkdemo.entity.Parameter;
 import javassist.Modifier;
 import org.apache.commons.lang3.ClassUtils;
-import org.itk.simple.ImageFilter_1;
+import org.itk.simple.ImageFilter;
 import org.reflections.Reflections;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class FilterService {
     private static List<Method> getMethods(java.lang.reflect.Method[] methods) {
         return Stream.of(methods)
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
-                .filter(method -> method.getName().startsWith("set"))
+                .filter(method -> method.getName().startsWith("set") || method.getName().startsWith("get"))
                 .map(method ->
                         Method.builder()
                                 .name(method.getName())
@@ -73,7 +73,7 @@ public class FilterService {
                                         .orElse(null);
 
                                 if (Objects.nonNull(setMethod)) {
-                                    Class paramClazz = setMethod.getParameterTypes()[1];
+                                    Class<?> paramClazz = setMethod.getParameterTypes()[1];
                                     parambuilder.multidimensional(paramClazz.isPrimitive() ? ClassUtils.primitiveToWrapper(paramClazz).getCanonicalName() : paramClazz.getCanonicalName());
                                 }
                             }
@@ -83,8 +83,8 @@ public class FilterService {
                 .collect(Collectors.toList());
     }
 
-    private static Set<Class<? extends ImageFilter_1>> getSubtypes() {
+    private static Set<Class<? extends ImageFilter>> getSubtypes() {
         Reflections reflections = new Reflections("org.itk.simple");
-        return reflections.getSubTypesOf(ImageFilter_1.class);
+        return reflections.getSubTypesOf(ImageFilter.class);
     }
 }
