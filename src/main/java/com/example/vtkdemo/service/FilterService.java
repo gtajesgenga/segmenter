@@ -58,7 +58,7 @@ public class FilterService {
     private static List<Method> getMethods(java.lang.reflect.Method[] methods) {
         return Stream.of(methods)
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
-                .filter(method -> method.getName().startsWith("set") || method.getName().startsWith("get"))
+                .filter(method -> method.getName().startsWith("set") || method.getName().startsWith("get") || method.getName().startsWith("add"))
                 .map(method ->
                         Method.builder()
                                 .name(method.getName())
@@ -76,6 +76,7 @@ public class FilterService {
                             if (org.springframework.util.ClassUtils.hasMethod(parameter.getType(), "size")) {
                                 java.lang.reflect.Method setMethod = Arrays.stream(parameter.getType().getMethods())
                                         .filter(paramMethod -> "set".equals(paramMethod.getName()))
+                                        .dropWhile(paramMethod -> paramMethod.getParameterTypes()[1].getCanonicalName().equals("java.lang.Object"))
                                         .findFirst()
                                         .orElse(null);
 

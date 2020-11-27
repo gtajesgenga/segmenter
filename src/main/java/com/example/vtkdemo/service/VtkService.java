@@ -62,6 +62,7 @@ public class VtkService {
 
     public byte[] execute(String studyId, String serieId, Long pipelineId) throws InvocationTargetException {
 
+        images.clear();
         List<String> instances = orthancClient.getInstances(studyId, serieId);
         log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
         log.info("Instances {}", Arrays.toString(instances.toArray()));
@@ -98,7 +99,7 @@ public class VtkService {
 
             images.push(imageSeriesReader.execute());
 
-            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+//            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
             for (Filter filter : pipeline.get().getFilters()) {
                 processFilter(filter);
@@ -146,7 +147,7 @@ public class VtkService {
                     .forEach(method -> processMethod(instance, method));
 
             images.push((Image) instance.getClass().getMethod("execute", images.peek().getClass()).invoke(instance, images.peek()));
-            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+//            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
         } catch (InstantiationException e) {
             log.error("Error creating new instance of '{}'", filter.getFilterClass(), e);
         } catch (NoSuchMethodException e) {
@@ -162,7 +163,7 @@ public class VtkService {
 
     private void processMethod(Object instance, Method method) {
         try {
-            log.debug("Processing method: {}", method.toString());
+            log.info("Processing method: {}", method.toString());
             instance.getClass().getMethod(method.getName(), getParamsTypes(method.getParameters())).invoke(instance, getParamsValues(method.getParameters()));
         } catch (NoSuchMethodException e) {
             log.error("Error getting method", e);
@@ -176,10 +177,10 @@ public class VtkService {
     }
 
     private Object[] getParamsValues(List<Parameter> parameters) {
-        return parameters.stream()
+        Object[] result = parameters.stream()
                 .map(parameter -> {
                     try {
-                        log.debug("Getting param value for parameter: {}", parameter.toString());
+                        log.info("Getting param value for parameter: {}", parameter.toString());
 
                         if (ClassUtils.isPrimitiveOrWrapper(parameter.getDefaultCasting())) {
 
@@ -198,6 +199,9 @@ public class VtkService {
 
                     return parameter.getDefaultCasting().cast(processValue(parameter));
                 }).toArray();
+
+        log.info("Processed params values: {}", result);
+        return result;
     }
 
     private Object processValue(Parameter parameter) {
@@ -206,7 +210,9 @@ public class VtkService {
                 log.debug("Processing values for parameter: {}", parameter.toString());
                 String[] strArray = parameter.getValue().replace("[", "").replace("]", "").split(",");
 
-                Object instance = parameter.getDefaultCasting().getConstructor(long.class).newInstance(strArray.length);
+
+                Object instance = parameter.getDefaultCasting().getConstructor(null).newInstance(null);
+//                Object instance = parameter.getDefaultCasting().getConstructor(long[].class).newInstance(initial);
 
 //                var ref = new Object() {
 //                    int i = 0;
@@ -218,13 +224,19 @@ public class VtkService {
                                 Object value;
                                 if (s.endsWith("%")) {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s.replace("%", ""));
-                                    value = Math.round(images.peek().getSize().get(i[0]) * Long.valueOf(value.toString()) / 100);
+                                    long longVvalue = images.peek().getSize().get(i[0]) * Long.parseLong(value.toString()) / 100L;
+                                    if (value instanceof Integer) {
+                                        value = (int) longVvalue;
+                                    } else {
+                                        value = longVvalue;
+                                    }
                                 } else {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s);
                                 }
-                                instance.getClass().getMethod("set", int.class, parameter.getMultidimensionalClass()
-                                        .getMethod(parameter.getMultidimensionalClass().getSimpleName().toLowerCase().replace("integer", "int") + "Value").getReturnType())
-                                        .invoke(instance, i[0], value);
+                                instance.getClass().getMethod("add", org.apache.commons.lang3.ClassUtils.primitiveToWrapper(parameter.getMultidimensionalClass()
+                                        .getMethod(parameter.getMultidimensionalClass().getSimpleName().toLowerCase().replace("integer", "int") + "Value")
+                                        .getReturnType()))
+                                        .invoke(instance, value);
                             i[0]++;
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
