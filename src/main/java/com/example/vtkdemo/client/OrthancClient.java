@@ -7,7 +7,7 @@ import com.example.vtkdemo.logging.EnableOutgoingLogging;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -59,7 +59,7 @@ public class OrthancClient {
             request = new HttpEntity<>(findRequestModel, headers);
         }
 
-        return restTemplate.postForObject(uriComponents.toUriString(), request, List.class);
+        return restTemplate.exchange(uriComponents.toUriString(), HttpMethod.POST, request, new ParameterizedTypeReference<List<String>>() {}).getBody();
     }
 
     @EnableOutgoingLogging
@@ -72,7 +72,7 @@ public class OrthancClient {
                 .path(orthancServerConfig.getEndpoints().get("instances"))
                 .buildAndExpand(instance);
 
-        HttpEntity request = new HttpEntity<>(new HttpHeaders());
+        HttpEntity<?> request = new HttpEntity<>(new HttpHeaders());
         if (orthancServerConfig.getAuthEnabled()) {
             HttpHeaders headers = new HttpHeaders();
             headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());

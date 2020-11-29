@@ -42,11 +42,17 @@ management:
       enabled: true
     prometheus:
       enabled: true
+    shutdown:
+      enabled: true
   metrics:
     export:
       prometheus:
         enabled: true
         step: 5s
+
+endpoints:
+  shutdown:
+    enabled: true
 
 application:
   tempFolder: ${BUILD_DIR:.}/tmp
@@ -67,7 +73,4 @@ servers:
 
 server:
   port: 8080
-
-# Ensure application is run in Vaadin 14/npm mode
-vaadin:
-  compatibilityMode: false
+  shutdown: graceful

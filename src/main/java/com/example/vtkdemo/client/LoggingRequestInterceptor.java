@@ -1,5 +1,6 @@
 package com.example.vtkdemo.client;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpRequest;
@@ -17,7 +18,7 @@ public class LoggingRequestInterceptor implements ClientHttpRequestInterceptor {
     private final static Logger log = LoggerFactory.getLogger(LoggingRequestInterceptor.class);
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    public @NotNull ClientHttpResponse intercept(@NotNull HttpRequest request, byte @NotNull [] body, ClientHttpRequestExecution execution) throws IOException {
         traceRequest(request, body);
         ClientHttpResponse response = execution.execute(request, body);
         traceResponse(response);

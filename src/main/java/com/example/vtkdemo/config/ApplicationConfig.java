@@ -5,11 +5,14 @@ import javax.servlet.Filter;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.vtkdemo.client.LoggingRequestInterceptor;
@@ -27,6 +30,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @ConfigurationProperties(prefix = "application")
+@EnableAutoConfiguration
 @Getter
 @Setter
 @Slf4j
@@ -51,7 +55,7 @@ public class ApplicationConfig {
         }
     }
 
-    @Bean(name = "restTemplate")
+    @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder
                 .build();
@@ -90,4 +94,13 @@ public class ApplicationConfig {
     public TimedAspect timedAspect(PrometheusMeterRegistry registry) {
         return new TimedAspect(registry);
     }
-}
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(Runtime.getRuntime().availableProcessors());
+        taskExecutor.setMaxPoolSize(Runtime.getRuntime().availableProcessors());
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        taskExecutor.initialize();
+        return taskExecutor;
+    }}
