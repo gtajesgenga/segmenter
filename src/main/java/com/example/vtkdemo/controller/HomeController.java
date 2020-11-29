@@ -3,7 +3,7 @@ package com.example.vtkdemo.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@Controller
+@SuppressWarnings("SameReturnValue") @Controller
 public class HomeController {
 
     @GetMapping("/ui/**")

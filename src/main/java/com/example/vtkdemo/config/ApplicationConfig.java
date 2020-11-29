@@ -5,6 +5,7 @@ import javax.servlet.Filter;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -29,6 +30,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @ConfigurationProperties(prefix = "application")
+@EnableAutoConfiguration
 @Getter
 @Setter
 @Slf4j
@@ -53,7 +55,7 @@ public class ApplicationConfig {
         }
     }
 
-    @Bean(name = "restTemplate")
+    @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         RestTemplate restTemplate = builder
                 .build();

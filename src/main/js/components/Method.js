@@ -26,7 +26,14 @@ export class Method extends React.Component {
     }
 
     render() {
-        let parameters = this.props.method.parameters.reduce((str, parameter) => { return str + parameter.value + ","; }, "");
+        let parameters = this.props.method.parameters.reduce((str, parameter) => {
+            let _value = parameter.value;
+
+            if (parameter.hasValues) {
+                _value = Object.keys(parameter.values).find(key => parameter.values[key].toString() === _value);
+            }
+            return str + _value + ",";
+            }, "");
 
         if (parameters.endsWith(",")) {
             parameters = parameters.substring(0, parameters.length -1)

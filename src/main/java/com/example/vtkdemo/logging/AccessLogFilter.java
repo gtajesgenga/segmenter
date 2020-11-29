@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AccessLogFilter implements Filter {
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         //init configuration
     }
 

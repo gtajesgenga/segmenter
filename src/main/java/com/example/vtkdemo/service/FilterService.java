@@ -6,6 +6,8 @@ import com.example.vtkdemo.entity.Parameter;
 
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import javassist.Modifier;
 import org.apache.commons.lang3.ClassUtils;
 import org.itk.simple.ImageFilter;
@@ -59,11 +61,13 @@ public class FilterService {
         return Stream.of(methods)
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
                 .filter(method -> method.getName().startsWith("set") || method.getName().startsWith("get") || method.getName().startsWith("add"))
-                .map(method ->
-                        Method.builder()
-                                .name(method.getName())
-                                .parameters(getParameters(method.getParameters()))
-                ).map(Method.MethodBuilder::build).collect(Collectors.toList());
+                .map(method -> {
+                    List<Parameter> parameters = getParameters(method.getParameters());
+                    return Method.builder()
+                            .name(method.getName())
+                            .parameters(parameters);
+                })
+                .map(Method.MethodBuilder::build).collect(Collectors.toList());
     }
 
     private static List<Parameter> getParameters(java.lang.reflect.Parameter[] parameters) {
@@ -84,6 +88,25 @@ public class FilterService {
                                     Class<?> paramClazz = setMethod.getParameterTypes()[1];
                                     parambuilder.multidimensional(paramClazz.isPrimitive() ? ClassUtils.primitiveToWrapper(paramClazz).getCanonicalName() : paramClazz.getCanonicalName());
                                 }
+                            }
+
+                            if (org.springframework.util.ClassUtils.hasMethod(parameter.getType(), "swigValue")) {
+                                Map<String, Integer> _map = Arrays.stream(parameter.getType().getDeclaredFields())
+                                        .filter(field -> Modifier.isPublic(field.getModifiers()))
+                                        .filter(field -> Modifier.isFinal(field.getModifiers()))
+                                        .filter(field -> Modifier.isStatic(field.getModifiers()))
+                                        .collect(Collectors.toMap(Field::getName, field -> {
+                                            Integer _value = -1;
+                                            try {
+                                                Object _instance = field.get(null);
+                                                _value = (Integer) field.getType().getDeclaredMethod("swigValue").invoke(_instance);
+                                            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                                                e.printStackTrace();
+                                            }
+                                            return _value;
+                                        }));
+                                parambuilder.hasValues(true);
+                                parambuilder.values(_map);
                             }
                             return parambuilder.build();
                         }

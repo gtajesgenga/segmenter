@@ -18,12 +18,10 @@ import org.springframework.util.ClassUtils;
 import vtk.*;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -128,6 +126,7 @@ public class VtkService {
             writer.SetFileTypeToBinary();
             writer.Write();
 
+            images.clear();
             try {
                 return IOUtils.toByteArray(new FileInputStream(new File(Paths.get(path.toString(), "out.vtk").toString())));
             } catch (IOException e) {
@@ -156,8 +155,6 @@ public class VtkService {
             log.error("Error on access to method", e);
         } catch (ClassNotFoundException e) {
             log.error("Error getting class", e);
-        } finally {
-            gc();
         }
     }
 
@@ -171,8 +168,6 @@ public class VtkService {
             log.error("Error on access to method", e);
         } catch (InvocationTargetException e) {
             log.error("Error on invocation", e);
-        } finally {
-            gc();
         }
     }
 
@@ -193,8 +188,6 @@ public class VtkService {
                         log.error("Error on access to method", e);
                     } catch (InvocationTargetException e) {
                         log.error("Error on invocation", e);
-                    } finally {
-                        gc();
                     }
 
                     return parameter.getDefaultCasting().cast(processValue(parameter));
@@ -211,12 +204,8 @@ public class VtkService {
                 String[] strArray = parameter.getValue().replace("[", "").replace("]", "").split(",");
 
 
-                Object instance = parameter.getDefaultCasting().getConstructor(null).newInstance(null);
-//                Object instance = parameter.getDefaultCasting().getConstructor(long[].class).newInstance(initial);
+                Object instance = parameter.getDefaultCasting().getConstructor().newInstance();
 
-//                var ref = new Object() {
-//                    int i = 0;
-//                };
                 final int[] i = {0};
                 Stream.of(strArray)
                         .forEach(s -> {
@@ -224,11 +213,11 @@ public class VtkService {
                                 Object value;
                                 if (s.endsWith("%")) {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s.replace("%", ""));
-                                    long longVvalue = images.peek().getSize().get(i[0]) * Long.parseLong(value.toString()) / 100L;
+                                    long longValue = images.peek().getSize().get(i[0]) * Long.parseLong(value.toString()) / 100L;
                                     if (value instanceof Integer) {
-                                        value = (int) longVvalue;
+                                        value = (int) longValue;
                                     } else {
-                                        value = longVvalue;
+                                        value = longValue;
                                     }
                                 } else {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s);
@@ -257,8 +246,12 @@ public class VtkService {
                 log.error("Error on invocation", e);
             } catch (InstantiationException e) {
                 log.error("Error creating new instance of '{}'", parameter.getDefaultCasting().getCanonicalName(), e);
-            } finally {
-                gc();
+            }
+        } else if (parameter.getHasValues()) {
+            try {
+                return parameter.getDefaultCasting().getMethod("swigToEnum", int.class).invoke(null, Integer.valueOf(parameter.getValue()));
+            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                e.printStackTrace();
             }
         }
         return parameter.getValue();
@@ -274,20 +267,9 @@ public class VtkService {
                             return clazz.getMethod(clazz.getSimpleName().toLowerCase().replace("integer", "int") + "Value").getReturnType();
                     } catch (NoSuchMethodException e) {
                         log.error("Error getting method", e);
-                    } finally {
-                        gc();
                     }
-                    return clazz;
-                })
-                .collect(Collectors.toList()).toArray(new Class[0]);
-    }
 
-    private static void gc() {
-        Object obj = new Object();
-        WeakReference ref = new WeakReference<>(obj);
-        obj = null;
-        while(ref.get() != null) {
-            System.gc();
-        }
+                    return clazz;
+                }).toArray(Class[]::new);
     }
 }

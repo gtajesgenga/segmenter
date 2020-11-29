@@ -26,11 +26,9 @@ class PipelineConverter implements AttributeConverter<List<Filter>, String> {
     @Override
     public List<Filter> convertToEntityAttribute(String s) {
         List<Filter> filters = null;
-        TypeReference<List<Filter>> typeRef
-                = new TypeReference<List<Filter>>() {
-        };
+
         try {
-            filters = objectMapper.readValue(s, typeRef);
+            filters = objectMapper.readValue(s, new TypeReference<>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }

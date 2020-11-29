@@ -6,6 +6,7 @@ import ReactDOM from "react-dom";
 import {CustomModal} from "../utils/Utils";
 import {Form} from "react-bootstrap"
 import {faEdit} from "@fortawesome/free-solid-svg-icons";
+import FormCheckInput from "react-bootstrap/FormCheckInput";
 
 export class MethodUpdateDialog extends React.Component {
     constructor (props) {
@@ -16,7 +17,16 @@ export class MethodUpdateDialog extends React.Component {
     handleSubmit (e) {
         e.preventDefault();
         this.props.method.parameters.forEach((parameter, index) => {
-            parameter.value = ReactDOM.findDOMNode(this.refs[this.props.method.name + "." + index]).value.trim()
+            let node = ReactDOM.findDOMNode(this.refs[this.props.method.name + "." + index])
+
+            switch (node.type) {
+                case 'checkbox':
+                    parameter.value = node.checked;
+                    break;
+                default:
+                    parameter.value = node.value.trim()
+                    break;
+            }
         });
         this.props.onUpdate(this.props.method);
     }
@@ -24,6 +34,7 @@ export class MethodUpdateDialog extends React.Component {
     render () {
         const inputs = this.props.method.parameters.map((parameter, index) => {
             let fieldType = 'text';
+            let selectOptions = (<></>);
             let placeholder = parameter.casting.split(".").pop();
             let min_ = 0;
             let max_ = 100;
@@ -34,6 +45,19 @@ export class MethodUpdateDialog extends React.Component {
             } else {
                 if (placeholder === 'Boolean') {
                     fieldType = 'checkbox';
+                } else if (parameter.hasValues) {
+                        fieldType = 'select';
+                    selectOptions = Object.keys(parameter.values).map((_key, _index) => {
+                        return (<option value={parameter.values[_key]} key={_key}>{_key}</option>);
+                    });
+                    return (
+                        <Form key={this.props.method.name + "." + index}>
+                            <Form.Label column={false}>{parameter.name}</Form.Label>
+                            <Form.Control as={fieldType} placeholder={placeholder} defaultValue={parameter.value} ref={this.props.method.name + "." + index}>
+                                {selectOptions}
+                            </Form.Control>
+                        </Form>
+                    );
                 } else {
                     fieldType = 'number';
 
@@ -72,6 +96,7 @@ export class MethodUpdateDialog extends React.Component {
                                   min={min_}
                                   max={max_}
                                   step={step}
+                                  defaultChecked={fieldType === 'checkbox' && parameter.value === 'true'}
                                   defaultValue={parameter.value}
                                   ref={this.props.method.name + "." + index}/>
                 </Form>
