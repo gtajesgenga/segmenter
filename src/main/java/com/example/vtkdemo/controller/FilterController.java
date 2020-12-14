@@ -35,8 +35,8 @@ public class FilterController {
         this.filterService = filterService;
     }
 
-    @Counted
-    @Timed
+    @Counted(value = "findAll.count")
+    @Timed(value = "findAll.time")
     @GetMapping
     @Operation(summary = "Get all available filters with their methods")
     @ApiResponses(value = {
@@ -50,8 +50,8 @@ public class FilterController {
         return CollectionModel.of(filters, linkTo(methodOn(this.getClass()).findAll()).withSelfRel());
     }
 
-    @Counted
-    @Timed
+    @Counted(value = "findByName.count")
+    @Timed(value = "findByName.time")
     @GetMapping("/{name}")
     @Operation(summary = "Get a filters by its class name or canonical name")
     @ApiResponses(value = {

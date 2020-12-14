@@ -26,10 +26,12 @@ public class Parameter {
 
     @Setter(AccessLevel.NONE)
     @JsonIgnore
+    @Builder.Default
     @ApiModelProperty(value = "Class casting for parameter value when the parameter is multidimensional", accessMode = ApiModelProperty.AccessMode.READ_ONLY, example = "java.lang.Long")
     private Class<?> multidimensionalClass = null;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Builder.Default
     @ApiModelProperty(value = "Multidimensional class name for parameter value when the parameter is multidimensional", accessMode = ApiModelProperty.AccessMode.READ_WRITE, example = "java.lang.Long")
     private String multidimensional = null;
 
@@ -39,6 +41,7 @@ public class Parameter {
     @ApiModelProperty(value = "Parameter value", accessMode = ApiModelProperty.AccessMode.READ_WRITE, example = "255")
     private String value;
 
+    @Builder.Default
     private Boolean hasValues = false;
 
     private Map<String, Integer> values;
