@@ -28,8 +28,8 @@ public class FilterService {
                 .collect(Collectors.toMap(Class::getCanonicalName, clazz -> getMethods(clazz.getMethods())));
     }
 
-    @Counted
-    @Timed
+    @Counted(value = "findAll.count")
+    @Timed(value = "findAll.time")
     public List<Filter> findAll() {
         List<Filter> results;
 
@@ -45,8 +45,8 @@ public class FilterService {
         return results;
     }
 
-    @Counted
-    @Timed
+    @Counted(value = "find.count")
+    @Timed(value = "find.time")
     public Optional<Filter> find(String className) {
         return filtersMap.entrySet().stream()
                 .filter(filter -> filter.getKey().equals(className) || filter.getKey().substring(filter.getKey().lastIndexOf('.') + 1).equals(className))

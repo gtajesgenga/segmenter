@@ -7,6 +7,9 @@ import com.example.vtkdemo.entity.Filter;
 import com.example.vtkdemo.entity.Method;
 import com.example.vtkdemo.entity.Parameter;
 import com.example.vtkdemo.repository.PipelineRepository;
+
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.itk.simple.Image;
@@ -58,6 +61,8 @@ public class VtkService {
         this.pipelineRepository = pipelineRepository;
     }
 
+    @Counted(value = "execute.count")
+    @Timed(value = "execute.time")
     public byte[] execute(String studyId, String serieId, Long pipelineId) throws InvocationTargetException {
 
         images.clear();

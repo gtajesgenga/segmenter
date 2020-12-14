@@ -3,6 +3,9 @@ package com.example.vtkdemo.controller;
 import com.example.vtkdemo.config.ApplicationConfig;
 import com.example.vtkdemo.service.VtkService;
 import com.sun.istack.NotNull;
+
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,6 +40,8 @@ public class VtkController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful retrieval of segmentation")
     })
+    @Counted(value = "getVTK.count")
+    @Timed(value = "getVTK.time")
     @ResponseBody
     public ResponseEntity<byte[]> getVTK(@NotNull @PathVariable String studyId,
                                          @NotNull @PathVariable String serieId,

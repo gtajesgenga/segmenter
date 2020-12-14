@@ -21,7 +21,8 @@ import com.example.vtkdemo.logging.AccessLogFilter;
 import io.micrometer.core.aop.CountedAspect;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.config.NamingConvention;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -86,13 +87,23 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public CountedAspect countedAspect(PrometheusMeterRegistry registry) {
+    public TimedAspect timedAspect(MeterRegistry registry) {
+        return new TimedAspect(registry);
+    }
+
+    @Bean
+    public CountedAspect countedAspect(MeterRegistry registry) {
         return new CountedAspect(registry);
     }
 
     @Bean
-    public TimedAspect timedAspect(PrometheusMeterRegistry registry) {
-        return new TimedAspect(registry);
+    public MeterRegistryCustomizer<MeterRegistry> metricsCustomizer() {
+
+        return  registry -> {
+            registry.config()
+                    .meterFilter(MeterFilter.ignoreTags("exception", "class"))
+                    .namingConvention(NamingConvention.identity);
+        };
     }
 
     @Bean

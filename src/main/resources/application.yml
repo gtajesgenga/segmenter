@@ -40,19 +40,21 @@ management:
   endpoint:
     metrics:
       enabled: true
-    prometheus:
-      enabled: true
     shutdown:
       enabled: true
   metrics:
     export:
-      prometheus:
+      graphite:
+        graphite-tags-enabled: false
+      statsd:
         enabled: true
-        step: 5s
-
-endpoints:
-  shutdown:
-    enabled: true
+        protocol: udp
+        polling-frequency: 30s
+        flavor: etsy
+        publish-unchanged-meters: false
+        host: localhost
+    tags:
+      application: ${spring.application.name}
 
 application:
   tempFolder: ${BUILD_DIR:.}/tmp

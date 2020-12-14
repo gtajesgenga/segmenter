@@ -19,26 +19,26 @@ import java.util.Optional;
 public interface PipelineRepository extends JpaRepository<Pipeline, Long> {
 
     @Operation(summary = "Get all pipelines")
-    @Timed
-    @Counted
+    @Counted(value = "findAll.count")
+    @Timed(value = "findAll.time")
     @EnableOutgoingLogging @NotNull
     Page<Pipeline> findAll(@NotNull Pageable pageable);
 
     @Operation(summary = "Save or update a pipeline")
-    @Timed
-    @Counted
+    @Counted(value = "save.count")
+    @Timed(value = "save.time")
     @EnableOutgoingLogging
     <S extends Pipeline> @NotNull S save(@NotNull S s);
 
     @Operation(summary = "Get a pipeline by Id")
-    @Timed
-    @Counted
+    @Counted(value = "findById.count")
+    @Timed(value = "findById.time")
     @EnableOutgoingLogging @NotNull
     Optional<Pipeline> findById(@NotNull Long aLong);
 
     @Operation(summary = "Delete a pipeline")
-    @Timed
-    @Counted
+    @Counted(value = "delete.count")
+    @Timed(value = "delete.time")
     @EnableOutgoingLogging
     void delete(@NotNull Pipeline pipeline);
 }
