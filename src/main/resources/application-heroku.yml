@@ -1,0 +1,14 @@
+servers:
+  orthanc:
+    host: gtajesgenga-heroku-orthanc.herokuapp.com
+    port: 443
+    scheme: https
+    auth-Enabled: true
+    username: orthanc
+    password: orthanc
+
+spring:
+  datasource:
+    url: jdbc:postgres://uwrojdwzetpspt:4cd84efb9e0c1b60a1f069544a8eb57f018b8f483b75a9ab1be79a58b62c1f96@ec2-54-235-116-235.compute-1.amazonaws.com:5432/dabefh5ov3fne6
+    username: uwrojdwzetpspt
+    password: 4cd84efb9e0c1b60a1f069544a8eb57f018b8f483b75a9ab1be79a58b62c1f96

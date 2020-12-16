@@ -1,1 +1,7 @@
 .git/
+.idea/
+.mvn/
+lib/
+node_modules/
+src/
+tmp/
