@@ -133,7 +133,7 @@ public class VtkService {
 
             images.clear();
             try {
-                return IOUtils.toByteArray(new FileInputStream(new File(Paths.get(path.toString(), "out.vtk").toString())));
+                return IOUtils.toByteArray(new FileInputStream(Paths.get(path.toString(), "out.vtk").toString()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -217,12 +217,14 @@ public class VtkService {
                             try {
                                 Object value;
                                 if (s.endsWith("%")) {
-                                    value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s.replace("%", ""));
-                                    long longValue = images.peek().getSize().get(i[0]) * Long.parseLong(value.toString()) / 100L;
+                                    double doublePercent = Double.parseDouble(s.replace("%", ""));
+                                    double doubleValue = Double.parseDouble(images.peek().getSize().get(i[0]).toString()) * doublePercent / 100D;
+                                    value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, "0");
+
                                     if (value instanceof Integer) {
-                                        value = (int) longValue;
+                                        value = (int) doubleValue;
                                     } else {
-                                        value = longValue;
+                                        value = Math.round(doubleValue);
                                     }
                                 } else {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s);

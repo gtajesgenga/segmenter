@@ -194,7 +194,7 @@
                     <wait>500</wait>
                     <maxAttempts>240</maxAttempts>
                     <fork>true</fork>
-                    <jvmArguments>-Xmx150m</jvmArguments>
+                    <!-- <jvmArguments>-Xmx150m</jvmArguments> -->
                 </configuration>
                 <executions>
                     <execution>
