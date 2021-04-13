@@ -22,4 +22,4 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build with Maven
-      run: mvn -B --skipTests=true package --file pom.xml
+      run: mvn -B -DskipTests package --file pom.xml
