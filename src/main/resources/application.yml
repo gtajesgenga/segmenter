@@ -49,7 +49,7 @@ management:
       statsd:
         enabled: true
         protocol: udp
-        polling-frequency: 30s
+        polling-frequency: 1s
         flavor: etsy
         publish-unchanged-meters: false
         host: localhost

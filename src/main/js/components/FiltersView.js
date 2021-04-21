@@ -4,6 +4,8 @@ import client from "../client/client";
 import when from "when";
 import {FilterList} from "./FilterList";
 import {Button, Form, InputGroup} from "react-bootstrap";
+import { Typeahead, Highlighter} from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 import ReactDOM from "react-dom";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
@@ -15,9 +17,11 @@ export class FiltersView extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = { pipelines: [], filters: [], selectedPipeline: undefined, selectedId: this.props.selectedId};
+        this.state = { pipelines: [], filters: [], selectedPipeline: undefined, selectedId: this.props.selectedId, selectedFilter: undefined};
+        this.selectedFilter = undefined;
         this.addFilter = this.addFilter.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleChangeFilter = this.handleChangeFilter.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
         this.onDelete = this.onDelete.bind(this);
         this.selectPipeline = this.selectPipeline.bind(this);
@@ -40,7 +44,7 @@ export class FiltersView extends React.Component{
             this.setState({
                 pipelines: pipelines
             });
-            this.selectPipeline(this.props.selectedId);
+            this.selectPipeline(this.state.selectedId);
             this.getAvailableFilters();
         })
     }
@@ -98,32 +102,59 @@ export class FiltersView extends React.Component{
 
     addFilter(e) {
         e.preventDefault();
-        const selectedId = ReactDOM.findDOMNode(this.refs.filter).value;
+        const selectedId = this.state.selectedFilter.id;
         const filter = JSON.parse(JSON.stringify(this.state.filters[selectedId]));
         filter.methods = [];
         this.state.selectedPipeline.entity.filters.push(filter);
         this.onUpdate(this.state.selectedPipeline);
     }
 
-    handleChange(e) {
-        e.preventDefault();
-        const selectedPipeline = ReactDOM.findDOMNode(this.refs.pipeline).value;
-        this.selectPipeline(selectedPipeline);
+    handleChange(selected) {
+        if (selected === undefined || selected.length === 0) {
+            this.selectPipeline(undefined);
+        } else {
+            this.selectPipeline(selected[0].value);
+        }
+    }
+
+    handleChangeFilter(selected) {
+        if (selected !== undefined && selected.length !== 0) {
+            this.setState({selectedFilter: selected[0]})
+        }
     }
 
     selectPipeline(selectedPipeline) {
-        const selected = selectedPipeline !== undefined ? this.state.pipelines.filter(pipeline => pipeline.entity.id.toString() === selectedPipeline)[0] :
-            this.state.pipelines[0];
+        const selected = selectedPipeline !== undefined ? this.state.pipelines.filter(pipeline => pipeline.entity.id.toString() === selectedPipeline.toString())[0] :
+            undefined;
         this.setState({selectedPipeline: selected, selectedId: selected !== undefined ? selected.entity.id : selected});
     }
 
+    mapFunction(pipeline, selectedId, selected) {
+        let result = {
+            id: pipeline.entity._links.self.href,
+            label: pipeline.entity.name,
+            value: pipeline.entity.id
+        }
+        if (selectedId !== undefined && pipeline.entity.id.toString() === selectedId.toString()) {
+            selected.value = result;
+        }
+        return result;
+    }
+
     render() {
-        const pipelines = this.state.pipelines.map(pipeline =>
-            <option key={pipeline.entity._links.self.href} value={pipeline.entity.id}>{pipeline.entity.name}</option>
-        );
-        const filters = this.state.filters.map((filter, index) =>
-            <option key={filter.filterClass.split(".").pop() + index} value={index}>{filter.filterClass.split(".").pop()}</option>
-        );
+        if (this.state.pipelines.length === 0) {
+            return (<></>)
+        }
+
+        let selected = { value: undefined }
+        const pipelines = this.state.pipelines.map(pipeline => this.mapFunction(pipeline, this.state.selectedId, selected));
+        const filters = this.state.filters.map((filter, index) => {
+            return {
+                id: index,
+                value: index,
+                label: filter.filterClass.split(".").pop()
+            }
+        });
 
         return (
             <div>
@@ -131,17 +162,40 @@ export class FiltersView extends React.Component{
                     <InputGroup.Prepend>
                         <Form.Label htmlFor="pipelineSelect" column={"sm"} className={"pl-0 pr-1"}>Pipeline:</Form.Label>
                     </InputGroup.Prepend>
-                    <Form.Control as={'select'}  size="sm" id="pipelineSelect" ref="pipeline" value={this.state.selectedId} onChange={this.handleChange} className={"mx-1"}>
-                        {pipelines}
-                    </Form.Control>
+                    <Typeahead
+                        id="pipelineSelect"
+                        ref="pipeline"
+                        placeholder="Select a pipeline..."
+                        options={pipelines}
+                        onChange={this.handleChange}
+                        className={"mx-1"}
+                        clearButton={true}
+                        selected={selected.value !== undefined ? [selected.value] : []}
+                        renderMenuItemChildren={(option, props, idx) => (
+                                <Highlighter search={props.text}>
+                                    {option[props.labelKey]}
+                                </Highlighter>
+                        )}
+                    />
                 </Form>
                 <Form inline className={"mb-3 d-flex-inline justify-content-end float-right"}>
                     <InputGroup.Prepend>
                         <Form.Label htmlFor="filterSelect" column={"sm"} className={"pl-0 pr-1"}>Filters:</Form.Label>
                     </InputGroup.Prepend>
-                    <Form.Control as={'select'}  size="sm" id="filterSelect" ref="filter" className={"mx-1"}>
-                        {filters}
-                    </Form.Control>
+                    <Typeahead
+                        id="filterSelect"
+                        ref="filter"
+                        placeholder="Select a filter..."
+                        options={filters}
+                        className={"mx-1"}
+                        onChange={this.handleChangeFilter}
+                        clearButton={true}
+                        renderMenuItemChildren={(option, props, idx) => (
+                            <Highlighter search={props.text}>
+                                {option[props.labelKey]}
+                            </Highlighter>
+                        )}
+                    />
                     <Button variant={"success"} size={'sm'} onClick={this.addFilter}><FontAwesomeIcon icon={faPlus}/>&nbsp;Add</Button>
                 </Form>
                 <FilterList selectedPipeline={this.state.selectedPipeline} onUpdate={this.onUpdate} onDelete={this.onDelete}/>

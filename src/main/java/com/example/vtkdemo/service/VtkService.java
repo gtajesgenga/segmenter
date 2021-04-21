@@ -46,7 +46,7 @@ public class VtkService {
         vtkNativeLibrary.DisableOutputWindow(null);
     }
 
-    private final Stack<Image> images = new Stack<>();
+    private final Deque<Image> images = new LinkedList<>();
 
     private final ApplicationConfig applicationConfig;
 
@@ -100,7 +100,7 @@ public class VtkService {
             final VectorString dicomNames = ImageSeriesReader.getGDCMSeriesFileNames(Objects.requireNonNull(path).toString());
             imageSeriesReader.setFileNames(dicomNames);
 
-            images.push(imageSeriesReader.execute());
+            images.addFirst(imageSeriesReader.execute());
 
 //            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
 
@@ -108,7 +108,7 @@ public class VtkService {
                 processFilter(filter);
             }
 
-            SimpleITK.writeImage(images.peek(), Paths.get(path.toString(), "generated.vtk").toString());
+            SimpleITK.writeImage(images.peekFirst(), Paths.get(path.toString(), "generated.vtk").toString());
 
             // Read the file
             vtkStructuredPointsReader reader = new vtkStructuredPointsReader();
@@ -133,7 +133,7 @@ public class VtkService {
 
             images.clear();
             try {
-                return IOUtils.toByteArray(new FileInputStream(new File(Paths.get(path.toString(), "out.vtk").toString())));
+                return IOUtils.toByteArray(new FileInputStream(Paths.get(path.toString(), "out.vtk").toString()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,7 +150,7 @@ public class VtkService {
             filter.getMethods()
                     .forEach(method -> processMethod(instance, method));
 
-            images.push((Image) instance.getClass().getMethod("execute", images.peek().getClass()).invoke(instance, images.peek()));
+            images.addFirst((Image) instance.getClass().getMethod("execute", images.peekFirst().getClass()).invoke(instance, images.peekFirst()));
 //            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
         } catch (InstantiationException e) {
             log.error("Error creating new instance of '{}'", filter.getFilterClass(), e);
@@ -217,12 +217,14 @@ public class VtkService {
                             try {
                                 Object value;
                                 if (s.endsWith("%")) {
-                                    value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s.replace("%", ""));
-                                    long longValue = images.peek().getSize().get(i[0]) * Long.parseLong(value.toString()) / 100L;
+                                    double doublePercent = Double.parseDouble(s.replace("%", ""));
+                                    double doubleValue = Double.parseDouble(images.peekFirst().getSize().get(i[0]).toString()) * doublePercent / 100D;
+                                    value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, "0");
+
                                     if (value instanceof Integer) {
-                                        value = (int) longValue;
+                                        value = (int) doubleValue;
                                     } else {
-                                        value = longValue;
+                                        value = Math.round(doubleValue);
                                     }
                                 } else {
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, s);

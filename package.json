@@ -27,6 +27,7 @@
     "react": "^16.5.2",
     "react-base-table": "^1.10.7",
     "react-bootstrap": "^1.3.0",
+    "react-bootstrap-typeahead": "^5.1.4",
     "react-dom": "^16.5.2",
     "react-router-dom": "^5.2.0",
     "rest": "^1.3.1",
