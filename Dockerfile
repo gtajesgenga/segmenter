@@ -27,9 +27,6 @@ RUN GLIBC_VERSION=2.28-r0 && \
 
 RUN rm -rf /tmp/* /var/cache/apk/*
 
-ARG DATABASE_URL
-ARG JAVA_OPTS
-
 ADD repo/kitware/community/vtk-natives-linux-x64/8.2/vtk-natives-linux-x64-8.2.tar.gz ./libvtk
 ADD repo/org/simpleitk/simpleitk-natives-linux-x64/2.0.0/simpleitk-natives-linux-x64-2.0.0.tar.gz ./libsimpleitk
 
@@ -44,7 +41,7 @@ ADD target/vtkdemo-0.0.1-SNAPSHOT.jar .
 
 #ENTRYPOINT [ "java" ]
 #CMD [ "java", "-Dserver.port=$PORT $JAVA_OPTS -jar vtkdemo-0.0.1-SNAPSHOT.jar" ]
-CMD echo "PORT=$PORT DB_URL=$SPRING_DATASOURCE_URL JAVA_OPTS=$JAVA_OPTS \r\n" && java -jar -Dserver.port=$PORT $JAVA_OPTS vtkdemo-0.0.1-SNAPSHOT.jar
+#CMD java $JAVA_OPTS -jar vtkdemo-0.0.1-SNAPSHOT.jar
 #CMD [ "/bin/bash" ]
-#ENTRYPOINT [ "java" ]
+ENTRYPOINT exec java $JAVA_OPS -jar vtkdemo-0.0.1-SNAPSHOT.jar
 #CMD [ "--version" ]
