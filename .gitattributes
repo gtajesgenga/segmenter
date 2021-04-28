@@ -1,1 +1,2 @@
 docker/jdk-11.0.9_linux-x64_bin.tar.gz filter=lfs diff=lfs merge=lfs -text
+repo/org/simpleitk/simpleitk-natives-linux-x64/2.0.0/simpleitk-natives-linux-x64-2.0.0/libSimpleITKJava.so filter=lfs diff=lfs merge=lfs -text

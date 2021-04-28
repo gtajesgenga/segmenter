@@ -34,7 +34,7 @@ public class AccessLogFilter implements Filter {
             int status = ((HttpServletResponse) response).getStatus();
             String method = ((HttpServletRequest) request).getMethod();
             String path = ((HttpServletRequest) request).getRequestURI();
-            String query = ((HttpServletRequest) request).getQueryString();
+            var query = ((HttpServletRequest) request).getQueryString();
             String pathWithQuery = query == null ? path : path + "?" + query;
 
             log.info("controller={} eventName={} path={} method={} status={} success={} responseTime={} logType=access",

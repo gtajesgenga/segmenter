@@ -1,7 +1,11 @@
 version: "3.7"
 services:
-  web:
-    build: .
+  segmentation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: segmentation
+    container_name: tesis_segmentation
     ports:
       - 8080:8080
     environment:
@@ -9,11 +13,12 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT=10000
     depends_on:
-      - db
+      - postgres
     networks:
       - tesis
-  db:
+  postgres:
     image: postgres
+    container_name: tesis_postgres
     ports:
     - 2345:5432
     restart: always

@@ -40,8 +40,8 @@ public class ApplicationConfig {
 
     private static final String ACCESS_LOG_FILTER = "AccessLogFilter";
     String tempFolder;
-
     Boolean restTemplateLogin;
+    Boolean enablePreview;
 
     @PostConstruct
     private void initialize() {
@@ -99,11 +99,9 @@ public class ApplicationConfig {
     @Bean
     public MeterRegistryCustomizer<MeterRegistry> metricsCustomizer() {
 
-        return  registry -> {
-            registry.config()
-                    .meterFilter(MeterFilter.ignoreTags("exception", "class"))
-                    .namingConvention(NamingConvention.identity);
-        };
+        return  registry -> registry.config()
+                .meterFilter(MeterFilter.ignoreTags("exception", "class"))
+                .namingConvention(NamingConvention.identity);
     }
 
     @Bean
