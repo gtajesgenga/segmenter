@@ -1,7 +1,6 @@
 package com.example.vtkdemo.logging;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -49,7 +48,7 @@ public class AccessAspect {
     }
 
     private void setLoggingContext(JoinPoint joinPoint) {
-        Signature signature = joinPoint.getSignature();
+        var signature = joinPoint.getSignature();
         String controllerName = signature.getDeclaringType().getSimpleName();
         String controllerMethodName = signature.getName();
         LoggingContext.setControllerName(controllerName);

@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+  segmentation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: segmentation
+    container_name: tesis_segmentation
+    ports:
+      - 8080:8080
+    environment:
+      - POSTGRES_DB=vtk
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_HIKARI_CONNECTION-TIMEOUT=10000
+    depends_on:
+      - postgres
+    networks:
+      - tesis
+  postgres:
+    image: postgres
+    container_name: tesis_postgres
+    ports:
+    - 2345:5432
+    restart: always
+    secrets:
+      - db-password
+    networks:
+      - tesis
+    environment:
+      - POSTGRES_DB=vtk
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+secrets:
+  db-password:
+    file: docker/db/password.txt
+networks:
+  tesis:

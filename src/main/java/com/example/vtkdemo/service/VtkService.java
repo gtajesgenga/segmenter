@@ -1,5 +1,7 @@
 package com.example.vtkdemo.service;
 
+import javax.annotation.PostConstruct;
+
 import com.example.vtkdemo.client.OrthancClient;
 import com.example.vtkdemo.config.ApplicationConfig;
 import com.example.vtkdemo.entity.Pipeline;
@@ -31,21 +33,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class VtkService {
 
-    static
-    {
-        if (!vtkNativeLibrary.LoadAllNativeLibraries())
-        {
-            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
-            {
-                if (!lib.IsLoaded())
-                {
-                    System.out.println(lib.GetLibraryName() + " not loaded");
-                }
-            }
-        }
-        vtkNativeLibrary.DisableOutputWindow(null);
-    }
-
+    private static final String ERROR_GETTING_METHOD = "Error getting method";
+    private static final String ERROR_ON_ACCESS_TO_METHOD = "Error on access to method";
+    private static final String ERROR_ON_INVOCATION = "Error on invocation";
     private final Deque<Image> images = new LinkedList<>();
 
     private final ApplicationConfig applicationConfig;
@@ -61,14 +51,27 @@ public class VtkService {
         this.pipelineRepository = pipelineRepository;
     }
 
+    @PostConstruct
+    private void initialize() {
+        if (!vtkNativeLibrary.LoadAllNativeLibraries())
+        {
+            for (vtkNativeLibrary lib : vtkNativeLibrary.values())
+            {
+                if (!lib.IsLoaded())
+                {
+                    log.warn("{} not loaded", lib.GetLibraryName());
+                }
+            }
+        }
+        vtkNativeLibrary.DisableOutputWindow(null);
+    }
+
     @Counted(value = "execute.count")
     @Timed(value = "execute.time")
     public byte[] execute(String studyId, String serieId, Long pipelineId) throws InvocationTargetException {
 
         images.clear();
-        List<String> instances = orthancClient.getInstances(studyId, serieId);
-        log.info("Instances received: {}", Objects.isNull(instances) ? 0 : instances.size());
-        log.info("Instances {}", Arrays.toString(instances.toArray()));
+        List<String> instances = Optional.ofNullable(orthancClient.getInstances(studyId, serieId)).orElse(Collections.emptyList());
 
         Optional<Pipeline> pipeline = pipelineRepository.findById(pipelineId);
 
@@ -77,14 +80,14 @@ public class VtkService {
 
             if (!instances.isEmpty()) {
                 path = Paths.get(applicationConfig.getTempFolder(), studyId, serieId);
-                log.debug("Path to create: {}", path.toAbsolutePath().toString());
+                log.debug("Path to create: {}", path.toAbsolutePath());
 
                 if (path.toFile().mkdirs()) {
 
                     log.debug("Path created");
-                    Path finalPath = path;
+                    var finalPath = path;
                     instances.forEach(instance -> {
-                        File file = Paths.get(finalPath.toString(), instance).toFile();
+                        var file = Paths.get(finalPath.toString(), instance).toFile();
                         try {
                             OutputStream os = new FileOutputStream(file);
                             os.write(orthancClient.fetchInstance(instance));
@@ -96,13 +99,15 @@ public class VtkService {
                 }
             }
 
-            ImageSeriesReader imageSeriesReader = new ImageSeriesReader();
+            var imageSeriesReader = new ImageSeriesReader();
             final VectorString dicomNames = ImageSeriesReader.getGDCMSeriesFileNames(Objects.requireNonNull(path).toString());
             imageSeriesReader.setFileNames(dicomNames);
 
             images.addFirst(imageSeriesReader.execute());
 
-//            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+            if (applicationConfig.getEnablePreview()) {
+                SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+            }
 
             for (Filter filter : pipeline.get().getFilters()) {
                 processFilter(filter);
@@ -111,21 +116,20 @@ public class VtkService {
             SimpleITK.writeImage(images.peekFirst(), Paths.get(path.toString(), "generated.vtk").toString());
 
             // Read the file
-            vtkStructuredPointsReader reader = new vtkStructuredPointsReader();
+            var reader = new vtkStructuredPointsReader();
             reader.SetFileName(Paths.get(path.toString(), "generated.vtk").toString());
             reader.Update();
 
-            vtkContourFilter contourFilter = new vtkContourFilter();
+            var contourFilter = new vtkContourFilter();
             contourFilter.SetInputData(reader.GetOutput());
             contourFilter.SetValue(0, 1.0);
 
             // Create a mapper and actor
-            vtkPolyDataMapper mapper = new vtkPolyDataMapper();
+            var mapper = new vtkPolyDataMapper();
             mapper.SetInputConnection(contourFilter.GetOutputPort());
             mapper.ScalarVisibilityOff();
-            //mapper.SetScalarModeToDefault();
 
-            vtkPolyDataWriter writer = new vtkPolyDataWriter();
+            var writer = new vtkPolyDataWriter();
             writer.SetFileName(Paths.get(path.toString(), "out.vtk").toString());
             writer.SetInputConnection(contourFilter.GetOutputPort());
             writer.SetFileTypeToBinary();
@@ -146,18 +150,22 @@ public class VtkService {
         try {
             Object instance = Class.forName(filter.getFilterClass()).getConstructor().newInstance();
 
-            log.debug("Processing filter: {}", filter.toString());
+            log.debug("Processing filter: {}", filter);
             filter.getMethods()
                     .forEach(method -> processMethod(instance, method));
 
+            assert images.peekFirst() != null;
             images.addFirst((Image) instance.getClass().getMethod("execute", images.peekFirst().getClass()).invoke(instance, images.peekFirst()));
-//            SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+
+            if (applicationConfig.getEnablePreview()) {
+                SimpleITK.show(images.peek(), String.valueOf(images.size()), false);
+            }
         } catch (InstantiationException e) {
             log.error("Error creating new instance of '{}'", filter.getFilterClass(), e);
         } catch (NoSuchMethodException e) {
-            log.error("Error getting method", e);
+            log.error(ERROR_GETTING_METHOD, e);
         } catch (IllegalAccessException e) {
-            log.error("Error on access to method", e);
+            log.error(ERROR_ON_ACCESS_TO_METHOD, e);
         } catch (ClassNotFoundException e) {
             log.error("Error getting class", e);
         }
@@ -168,11 +176,11 @@ public class VtkService {
             log.info("Processing method: {}", method.toString());
             instance.getClass().getMethod(method.getName(), getParamsTypes(method.getParameters())).invoke(instance, getParamsValues(method.getParameters()));
         } catch (NoSuchMethodException e) {
-            log.error("Error getting method", e);
+            log.error(ERROR_GETTING_METHOD, e);
         } catch (IllegalAccessException e) {
-            log.error("Error on access to method", e);
+            log.error(ERROR_ON_ACCESS_TO_METHOD, e);
         } catch (InvocationTargetException e) {
-            log.error("Error on invocation", e);
+            log.error(ERROR_ON_INVOCATION, e);
         }
     }
 
@@ -188,11 +196,11 @@ public class VtkService {
                                     .invoke(null, parameter.getValue());
                         }
                     } catch (NoSuchMethodException e) {
-                        log.error("Error getting method", e);
+                        log.error(ERROR_GETTING_METHOD, e);
                     } catch (IllegalAccessException e) {
-                        log.error("Error on access to method", e);
+                        log.error(ERROR_ON_ACCESS_TO_METHOD, e);
                     } catch (InvocationTargetException e) {
-                        log.error("Error on invocation", e);
+                        log.error(ERROR_ON_INVOCATION, e);
                     }
 
                     return parameter.getDefaultCasting().cast(processValue(parameter));
@@ -205,20 +213,21 @@ public class VtkService {
     private Object processValue(Parameter parameter) {
         if (parameter.getMultidimensional() != null) {
             try {
-                log.debug("Processing values for parameter: {}", parameter.toString());
+                log.debug("Processing values for parameter: {}", parameter);
                 String[] strArray = parameter.getValue().replace("[", "").replace("]", "").split(",");
 
 
                 Object instance = parameter.getDefaultCasting().getConstructor().newInstance();
 
-                final int[] i = {0};
+                final var i = new int[] {0};
                 Stream.of(strArray)
                         .forEach(s -> {
                             try {
                                 Object value;
                                 if (s.endsWith("%")) {
-                                    double doublePercent = Double.parseDouble(s.replace("%", ""));
-                                    double doubleValue = Double.parseDouble(images.peekFirst().getSize().get(i[0]).toString()) * doublePercent / 100D;
+                                    var doublePercent = Double.parseDouble(s.replace("%", ""));
+                                    assert images.peekFirst() != null;
+                                    var doubleValue = Double.parseDouble(images.peekFirst().getSize().get(i[0]).toString()) * doublePercent / 100D;
                                     value = parameter.getMultidimensionalClass().getMethod("valueOf", String.class).invoke(null, "0");
 
                                     if (value instanceof Integer) {
@@ -237,24 +246,24 @@ public class VtkService {
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
                             } catch (InvocationTargetException e) {
-                                log.error("Error on invocation", e);
+                                log.error(ERROR_ON_INVOCATION, e);
                             } catch (NoSuchMethodException e) {
-                                log.error("Error getting method", e);
+                                log.error(ERROR_GETTING_METHOD, e);
                             }
                         });
 
                 return instance;
 
             } catch (NoSuchMethodException e) {
-                log.error("Error getting method", e);
+                log.error(ERROR_GETTING_METHOD, e);
             } catch (IllegalAccessException e) {
-                log.error("Error on access to method", e);
+                log.error(ERROR_ON_ACCESS_TO_METHOD, e);
             } catch (InvocationTargetException e) {
-                log.error("Error on invocation", e);
+                log.error(ERROR_ON_INVOCATION, e);
             } catch (InstantiationException e) {
                 log.error("Error creating new instance of '{}'", parameter.getDefaultCasting().getCanonicalName(), e);
             }
-        } else if (parameter.getHasValues()) {
+        } else if (Boolean.TRUE.equals(parameter.getHasValues())) {
             try {
                 return parameter.getDefaultCasting().getMethod("swigToEnum", int.class).invoke(null, Integer.valueOf(parameter.getValue()));
             } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
@@ -273,7 +282,7 @@ public class VtkService {
                         if (ClassUtils.isPrimitiveOrWrapper(clazz))
                             return clazz.getMethod(clazz.getSimpleName().toLowerCase().replace("integer", "int") + "Value").getReturnType();
                     } catch (NoSuchMethodException e) {
-                        log.error("Error getting method", e);
+                        log.error(ERROR_GETTING_METHOD, e);
                     }
 
                     return clazz;

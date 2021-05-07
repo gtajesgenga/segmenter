@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    username: postgres
+    password: ${POSTGRES_PASSWORD:db-wrz2z}
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?applicationName=${spring.application.name}
+    data: "classpath:/data.sql"
+    initialize: true
+    initialization-mode: always
+
+    hikari:
+      connection-timeout: 10000
+
+servers:
+  orthanc:
+    host: orthanc
+    username: demo
+    password: demo

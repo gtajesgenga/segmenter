@@ -19,6 +19,7 @@ import com.example.vtkdemo.controller.VtkController;
 import com.example.vtkdemo.entity.Filter;
 import com.example.vtkdemo.entity.Pipeline;
 import com.example.vtkdemo.repository.PipelineRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ExtendWith(SpringExtension.class)
@@ -49,7 +51,7 @@ public class PipelineDtoEntityControllerTest {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream)) ) {
             filters = objectMapper.readValue(reader.lines()
-                    .collect(Collectors.joining("\n")), List.class);
+                    .collect(Collectors.joining("\n")), new TypeReference<>() {});
         }
 
         Pipeline request = Pipeline.builder()
@@ -73,7 +75,7 @@ public class PipelineDtoEntityControllerTest {
                 "1.2.276.0.7230010.3.1.3.8323329.22968.1583329709.26297",
                 id);
         try {
-            assertThat(IOUtils.toByteArray(this.getClass().getResourceAsStream("/test.vtk")), equalTo(result.getBody()));
+            assertThat(IOUtils.toByteArray(Objects.requireNonNull(this.getClass().getResourceAsStream("/test.vtk"))), equalTo(result.getBody()));
         } catch (IOException e) {
             e.printStackTrace();
         }

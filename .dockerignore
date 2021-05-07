@@ -1,1 +1,5 @@
-.git/
+*
+!docker/jdk-11.0.9_linux-x64_bin.tar.gz
+!repo/kitware/community/vtk-natives-linux-x64/8.2/vtk-natives-linux-x64-8.2.tar.gz
+!repo/org/simpleitk/simpleitk-natives-linux-x64/2.0.0/simpleitk-natives-linux-x64-2.0.0.tar.gz
+!target/vtkdemo-0.0.1-SNAPSHOT.jar

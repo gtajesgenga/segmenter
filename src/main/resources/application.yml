@@ -57,6 +57,7 @@ management:
       application: ${spring.application.name}
 
 application:
+  enablePreview: false
   tempFolder: ${BUILD_DIR:.}/tmp
   rest-template-login: false
 
@@ -70,8 +71,8 @@ servers:
       find: "/tools/find/"
       instances: "/instances/{instance}/file"
     auth-Enabled: true
-    username: orthanc
-    password: 0rth4ncP4ssw0rd
+    username: demo
+    password: demo
 
 server:
   port: 8080

@@ -1,11 +1,5 @@
 package com.example.vtkdemo.client;
 
-import com.example.vtkdemo.client.model.FindRequestModel;
-import com.example.vtkdemo.client.model.QueryRequestModel;
-import com.example.vtkdemo.config.OrthancServerConfig;
-import com.example.vtkdemo.logging.EnableOutgoingLogging;
-
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -14,10 +8,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.example.vtkdemo.client.model.FindRequestModel;
+import com.example.vtkdemo.client.model.QueryRequestModel;
+import com.example.vtkdemo.config.OrthancServerConfig;
+import com.example.vtkdemo.logging.EnableOutgoingLogging;
+
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -36,7 +38,7 @@ public class OrthancClient {
 
     @EnableOutgoingLogging
     public List<String> getInstances(String studyId, String serieId) {
-        FindRequestModel findRequestModel = FindRequestModel.builder()
+        var findRequestModel = FindRequestModel.builder()
                 .Level(INSTANCE)
                 .Query(QueryRequestModel.builder()
                         .StudyInstanceUID(studyId)
@@ -44,7 +46,7 @@ public class OrthancClient {
                         .build())
                 .build();
 
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+        var uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(orthancServerConfig.getScheme())
                 .host(orthancServerConfig.getHost())
                 .port(orthancServerConfig.getPort())
@@ -53,19 +55,23 @@ public class OrthancClient {
 
         HttpEntity<FindRequestModel> request = new HttpEntity<>(findRequestModel);
 
-        if (orthancServerConfig.getAuthEnabled()) {
-            HttpHeaders headers = new HttpHeaders();
+        if (Boolean.TRUE.equals(orthancServerConfig.getAuthEnabled())) {
+            var headers = new HttpHeaders();
             headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
             request = new HttpEntity<>(findRequestModel, headers);
         }
 
-        return restTemplate.exchange(uriComponents.toUriString(), HttpMethod.POST, request, new ParameterizedTypeReference<List<String>>() {}).getBody();
+        var opResult = Optional.ofNullable(restTemplate.exchange(uriComponents.toUriString(), HttpMethod.POST, request, new ParameterizedTypeReference<List<String>>() {}).getBody());
+        var result = opResult.orElse(Collections.emptyList());
+        log.info("Instances received: {}", result.size());
+        log.info("Instances {}", Arrays.toString(result.toArray()));
+        return  result;
     }
 
     @EnableOutgoingLogging
     public byte[] fetchInstance(String instance) {
 
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+        var uriComponents = UriComponentsBuilder.newInstance()
                 .scheme(orthancServerConfig.getScheme())
                 .host(orthancServerConfig.getHost())
                 .port(orthancServerConfig.getPort())
@@ -73,8 +79,8 @@ public class OrthancClient {
                 .buildAndExpand(instance);
 
         HttpEntity<?> request = new HttpEntity<>(new HttpHeaders());
-        if (orthancServerConfig.getAuthEnabled()) {
-            HttpHeaders headers = new HttpHeaders();
+        if (Boolean.TRUE.equals(orthancServerConfig.getAuthEnabled())) {
+            var headers = new HttpHeaders();
             headers.setBasicAuth(orthancServerConfig.getUsername(), orthancServerConfig.getPassword());
             request = new HttpEntity<>(headers);
         }
