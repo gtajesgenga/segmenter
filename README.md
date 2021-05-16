@@ -1,6 +1,5 @@
 # Segmentation
 
----
 This repo contains the Segmentation service.
 
 ## Build & Deploy
