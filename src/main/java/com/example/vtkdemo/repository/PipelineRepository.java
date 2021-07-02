@@ -5,6 +5,7 @@ import com.example.vtkdemo.logging.EnableOutgoingLogging;
 
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+@Api(description = "Pipeline CRUD Operations")
 public interface PipelineRepository extends JpaRepository<Pipeline, Long> {
 
     @Operation(summary = "Get all pipelines")
