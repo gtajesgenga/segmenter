@@ -9,6 +9,7 @@ spring:
 
     hikari:
       connection-timeout: 10000
+      initialization-fail-timeout: 30000
 
 servers:
   orthanc:
