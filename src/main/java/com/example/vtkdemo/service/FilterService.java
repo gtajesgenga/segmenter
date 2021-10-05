@@ -60,7 +60,7 @@ public class FilterService {
     private static List<Method> getMethods(java.lang.reflect.Method[] methods) {
         return Stream.of(methods)
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
-                .filter(method -> method.getName().startsWith("set") || method.getName().startsWith("get") || method.getName().startsWith("add"))
+                .filter(method -> method.getName().startsWith("set") || method.getName().startsWith("add"))
                 .map(method -> {
                     List<Parameter> parameters = getParameters(method.getParameters());
                     return Method.builder()

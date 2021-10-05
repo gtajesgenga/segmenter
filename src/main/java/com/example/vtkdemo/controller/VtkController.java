@@ -6,6 +6,7 @@ import com.sun.istack.NotNull;
 
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping(path = "/api/vtk")
+@Api(tags = {"VTK Controller"}, description = "VTK controller to generate segmentations")
 public class VtkController {
 
     private final VtkService vtkService;

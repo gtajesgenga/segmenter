@@ -17,6 +17,7 @@ import com.example.vtkdemo.service.FilterService;
 
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/filters", produces = {MediaType.APPLICATION_JSON_VALUE})
+@Api(tags = {"Filter Controller"}, description = "Filter controller to query available filters")
 public class FilterController {
 
     private final FilterResourceAssembler filterResourceAssembler;
@@ -53,7 +55,7 @@ public class FilterController {
     @Counted(value = "findByName.count")
     @Timed(value = "findByName.time")
     @GetMapping("/{name}")
-    @Operation(summary = "Get a filters by its class name or canonical name")
+    @Operation(summary = "Get a filter by its class name or canonical name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful retrieval of filter"),
             @ApiResponse(responseCode = "404", description = "Unsuccessful retrieval of filter")

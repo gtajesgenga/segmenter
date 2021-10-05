@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-@Api(description = "Pipeline CRUD Operations")
+@Api(tags = {"Pipeline Controller"}, description = "Pipeline controller for CRUD Operations")
 public interface PipelineRepository extends JpaRepository<Pipeline, Long> {
 
     @Operation(summary = "Get all pipelines")
